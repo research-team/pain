@@ -3,19 +3,19 @@
 #### Firstly, please, install NEURON
 Source and installation guide here: https://neuron.yale.edu/neuron/getstd.
 
-Please, install with python(this key: --with-nrnpython) and mpi(for parallel computing)
+Please, install with python(this key: ```--with-nrnpython```) and mpi(for parallel computing)
 
-#### Clone our project 
-git clone https://github.com/research-team/pain.git
+#### Please, clone our project 
+```git clone https://github.com/research-team/pain.git```
 
 #### Before simulation compile mod files
-go to directory /pain
+go to directory ```/pain```
 
-nrnivmodl ./mod
+```nrnivmodl ./mod```
 
 #### One tread one C-fiber simulation
 ![alt text](https://pp.userapi.com/c858324/v858324062/bb67/2I6RwK1sNdg.jpg)
-nrniv -python onefibersimulation.py 2[number of model]
+```nrniv -python onefibersimulation.py 2[number of model]```
 
 if everything is ok you'll see similar output:
 ```stimsec[119] { nseg=1  L=250  Ra=35
@@ -53,4 +53,4 @@ Simulation is run about a minute usually. But, notice, the 9th model is run abou
 #### Parallel simulation of сomplex activity (several C-fibers)
 For complex activity simulation we recommend use parallel computing. But even in this case model run from 12 hours to few days. It depends on computer performance and number of threads. Notice, number of threads shouldn't be more then number of C-fibers.
 
-mpiexec -n 2[number of tread] nrniv -mpi -python parallelsimulation.py 
+```mpiexec -n 2[number of tread] nrniv -mpi -python parallelsimulation.py ```
