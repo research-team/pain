@@ -3,7 +3,7 @@
 #### Firstly, please, install NEURON
 Source and installation guide here: https://neuron.yale.edu/neuron/getstd.
 
-Please, install with python and mpi(for parallel computing)
+Please, install with python(this key: --with-nrnpython) and mpi(for parallel computing)
 
 #### Clone our project 
 git clone https://github.com/research-team/pain.git
