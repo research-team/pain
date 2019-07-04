@@ -1,7 +1,8 @@
 # Nociception project
 
-#### Firstly, install NEURON
-Source and installation guide here: https://neuron.yale.edu/neuron/getstd
+#### Firstly, please, install NEURON
+Source and installation guide here: https://neuron.yale.edu/neuron/getstd.
+
 Please, install with python and mpi(for parallel computing)
 
 #### Clone our project 
@@ -50,4 +51,5 @@ Simulation is run about a minute usually. But, notice, the 9th model is run abou
 
 #### Parallel simulation of сomplex activity (several C-fibers)
 For complex activity simulation we recommend use parallel computing. But even in this case model run from 12 hours to few days. It depends on computer performance and number of threads. Notice, number of threads shouldn't be more then number of C-fibers.
+
 mpiexec -n 2[number of tread] nrniv -mpi -python parallelsimulation.py 
