@@ -48,9 +48,11 @@ After simulation you can see the voltage graph of TG:
 This is for 8th model
 ![alt text](https://pp.userapi.com/c853620/v853620062/8704c/kAPLt5YA0h0.jpg)
 
-Simulation is run about a minute usually. But, notice, the 9th model is run about 2 hours because of delta t between applications. Also, the running time depends on computer performance. 
+Duration of simulation is about a minute usually. But, notice, the duration of the 9th model simulation is about 2 hours because of tstop of this simulation is 2min. Also, the running time depends on computer performance. 
 
 #### Parallel simulation of сomplex activity (several C-fibers)
-For complex activity simulation we recommend use parallel computing. But even in this case model run from 12 hours to few days. It depends on computer performance and number of threads. Notice, number of threads shouldn't be more then number of C-fibers.
+For complex activity simulation we recommend to use parallel computing, but even in this case calcutation takes from 12 hours to few days, calculation time depends on computer performance and number of threads. Notice, number of threads shouldn't be more then number of C-fibers.
+
+To run parallel calculation, please, use this command:
 
 ```mpiexec -n 2[number of tread] nrniv -mpi -python parallelsimulation.py ```
