@@ -61,4 +61,4 @@ For persistent ATP application we use range of model: 5...8
 
 For persistent 5-HT application we use range of model: 13...14
 
-After simulation spiketimes and extracellular of each fiber are recorded. You can plot graphs in any convenient way.
+After simulation spiketimes and extracellular voltage of each fiber are recorded. You can plot graphs in any convenient way.
