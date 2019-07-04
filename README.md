@@ -13,11 +13,15 @@ go to directory ```/pain```
 
 ```nrnivmodl ./mod```
 
+After succesful compile you can see:
+
+```Successfully created x86_64/special```
+
 #### One tread one C-fiber simulation
 ![alt text](https://pp.userapi.com/c858324/v858324062/bb67/2I6RwK1sNdg.jpg)
 ```nrniv -python onefibersimulation.py 2[number of model]```
 
-if everything is ok you'll see similar output:
+If everything is ok you'll see similar output:
 ```stimsec[119] { nseg=1  L=250  Ra=35
 	stimsec[118] connect stimsec[119] (0), 1
 	/* First segment only */
@@ -53,6 +57,9 @@ Duration of simulation is about a minute usually, but, notice, the duration of t
 #### Parallel simulation of сomplex activity (several C-fibers)
 For complex activity simulation we recommend to use parallel computing, but even in this case calcutation takes from 12 hours to few days, calculation time depends on computer performance and number of threads. Notice, number of threads shouldn't be more then number of C-fibers.
 
+Before run  parallel calculation, please, make the directory for recorded results:
+```mkdir results```
+
 To run parallel calculation, please, use this command:
 
 ```mpiexec -n 2 nrniv -mpi -python parallelsimulation.py 10[number of fibers] [range of model included in calculation:] 2[start range] 8[end range] ```
@@ -61,4 +68,27 @@ For persistent ATP application we use range of model: 5...8
 
 For persistent 5-HT application we use range of model: 13...14
 
-After simulation spiketimes and extracellular voltage of each fiber are recorded. You can plot graphs in any convenient way.
+If everything is ok you'll see similar output:
+
+```numprocs=2
+NEURON -- VERSION 7.6.2 master (f5a1284) 2018-08-15
+Duke, Yale, and the BlueBrain Project -- Copyright 1984-2018
+See http://neuron.yale.edu/neuron/credits
+
+Additional mechanisms from files
+ ./mod//5ht.mod ./mod//DNav18.mod ./mod//Nav17_a.mod ./mod//Nav18_a.mod ./mod//Nav1_3.mod ./mod//atp4.mod ./mod//atp42.mod ./mod//extrapump.mod ./mod//k_ion_dynamics.mod ./mod//kadist.mod ./mod//kaprox.mod ./mod//kdr.mod ./mod//kf.mod ./mod//kna.mod ./mod//ks.mod ./mod//leak.mod ./mod//na1p8.mod ./mod//na_ion_dynamics.mod ./mod//nakpump.mod ./mod//nattxs.mod ./mod//nav18.mod ./mod//nav1p9.mod ./mod//p2x2.mod ./mod//p2x3.mod ./mod//p2x32.mod ./mod//serotonin.mod ./mod//slow5HT.mod ./mod//slowATP.mod
+ls: /usr/local/bin/../lib/libpython*.dylib: No such file or directory
+- - - - - - - - - -  
+start
+- - - - - - - - - -  
+start
+- - - - - - - - - -  
+end
+- - - - - - - - - -  
+end
+<_io.TextIOWrapper name='out.spk' mode='w' encoding='UTF-8'>
+<_io.TextIOWrapper name='out.spk' mode='a' encoding='UTF-8'>
+```
+
+
+After simulation spiketimes and extracellular voltage of each fiber are recorded in ```/results``` directory. You can plot graphs in any convenient way.
