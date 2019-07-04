@@ -45,7 +45,7 @@ def balance(cell, vinit=-55):
         else:
             sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)
 
-def simulate(cell, tstop=500, vinit=-55):
+def simulate(cell, tstop=300, vinit=-55):
     ''' simulation control 
     Parameters
     ----------
@@ -111,15 +111,7 @@ if __name__ == '__main__':
         for sec in h.allsec():
             h.psection(sec=sec) #show parameters of each section
         branch_vec, t_vec = set_recording_vectors(cell.branch)
-        branch_vec1, t_vec = set_recording_vectors(cell.stimsec[58])
-        branch_vec2, t_vec = set_recording_vectors(cell.stimsec[57])
-        branch_vec3, t_vec = set_recording_vectors(cell.stimsec[56])
-        branch_vec4, t_vec = set_recording_vectors(cell.stimsec[5])
         print("Number of model - ",cell.numofmodel)
         simulate(cell)
         show_output(branch_vec, t_vec)
-        show_output(branch_vec1, t_vec)
-        show_output(branch_vec2, t_vec)
-        show_output(branch_vec3, t_vec)
-        show_output(branch_vec4, t_vec)
         pyplot.show()

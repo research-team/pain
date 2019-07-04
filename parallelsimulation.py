@@ -15,7 +15,7 @@ rank = int(pc.id())
 nhost = int(pc.nhost())
 
 #parameters
-cell_number = 2 # number of neurons 
+cell_number = int(sys.argv[4]) # number of neurons 
 fibers = []
 nclist = []
 spike_times_vec = h.Vector()
@@ -36,7 +36,7 @@ def addfibers(num = cell_number):
     global fibers, rank, nhost, spike_times_vec, id_vec
     gids = []
     for i in range(rank, num, nhost):
-        cell = cfiber(250, random.uniform(0.2, 3), random.randint(100, 500), random.randint(100, 1000), False, random.randint(5, 8))
+        cell = cfiber(250, random.uniform(0.2, 3), random.randint(100, 500), random.randint(100, 1000), False, random.randint(int(sys.argv[5]), int(sys.argv[6])))
         fibers.append(cell)
         pc.set_gid2node(i, rank)
         nc = cell.connect2target(None)
@@ -65,7 +65,7 @@ def spike_record(pool):
         v_vec.append(vec)
     return v_vec
 
-def simulate(pool, tstop=30000, vinit=-55):
+def simulate(pool, tstop=300, vinit=-55):
     ''' simulation control 
     Parameters
     ----------
@@ -113,7 +113,7 @@ def spikeout(pool, name, v_vec):
     for i in range(nhost):
         if i == rank:
             for j in range(len(pool)):
-                path=str('./res/'+ name + '%dr%d'%(j,rank))
+                path=str('./results/'+ name + '%dr%d'%(j,rank))
                 f = open(path, 'w')
                 for v in list(v_vec[j]):
                     f.write(str(v)+"\n")
@@ -154,6 +154,6 @@ if __name__ == '__main__':
     simulate(pool)
     print("- "*10, "\nend")
     spikeout(pool, "vext", vext)
-    spiketimeout("out.spk")
+    spiketimeout("./results/out.spk")
     #if (nhost > 1):
     finish()
