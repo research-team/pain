@@ -10,6 +10,7 @@ git clone https://github.com/research-team/pain.git
 
 #### Before simulation compile mod files
 go to directory /pain
+
 nrnivmodl ./mod
 
 #### One tread one C-fiber simulation
