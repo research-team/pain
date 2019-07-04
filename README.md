@@ -91,4 +91,4 @@ end
 ```
 
 
-After simulation spiketimes and extracellular voltage of each fiber are recorded in ```/results``` directory. You can plot graphs in any convenient way.
+After simulation spiketimes and extracellular voltages of each fiber are recorded in ```/results``` directory. Out.spk file is spiketimes, you can open this file with any text editor. File in format 'vext%d[number of neuron in thread]r%d[number of thread]' is extracellular voltage for one C-fiber. You can plot graphs in any convenient way.
