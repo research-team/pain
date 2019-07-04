@@ -55,4 +55,10 @@ For complex activity simulation we recommend to use parallel computing, but even
 
 To run parallel calculation, please, use this command:
 
-```mpiexec -n 2[number of tread] nrniv -mpi -python parallelsimulation.py ```
+```mpiexec -n 2 nrniv -mpi -python parallelsimulation.py 10[number of fibers] [range of model included in calculation:] 2[start range] 8[end range] ```
+
+For persistent ATP application we use range of model: 5...8
+
+For persistent 5-HT application we use range of model: 13...14
+
+After simulation spiketimes and extracellular of each fiber are recorded. You can plot graphs in any convenient way.
