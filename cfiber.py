@@ -127,7 +127,7 @@ class cfiber(object):
         if self.numofmodel == 11 or self.numofmodel == 12:
             self.x_application = -400
             for compartment in self.all:
-                distance = math.sqrt((30250-self.coordinates.get(compartment).get('x'))**2 + (self.x_application-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
+                distance = math.sqrt((30050-self.coordinates.get(compartment).get('x'))**2 + (self.x_application-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
                 self.distances.update({compartment: distance})
         else:
             for compartment in self.all:
