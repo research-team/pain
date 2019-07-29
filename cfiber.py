@@ -176,7 +176,7 @@ class cfiber(object):
             if self.numofmodel == 13 or self.numofmodel == 14:
                 self.add_5HTreceptors(sec, 10, 9)
             else:
-                self.add_P2Xreceptors(sec, 10, 12)
+                self.add_P2Xreceptors(sec, 10, 2.5)
     def add_P2Xreceptors(self, compartment, time, g):
         '''
         Adds P2X3 receptors
@@ -200,7 +200,7 @@ class cfiber(object):
             if self.numofmodel == 1:
                 diff.k = 0
             elif self.numofmodel == 3:
-                diff.k = 0.8
+                diff.k = 0.6
             else:
                 diff.k = 0.01
         else:
@@ -215,14 +215,14 @@ class cfiber(object):
         if self.numofmodel == 4 or self.numofmodel == 5:
             rec2 = h.p2x2(compartment(0.5))
             rec2.Ev = -7
-            rec2.gmax = 4
+            rec2.gmax = 1
             h.setpointer(diff._ref_atp, 'patp', rec2)
             self.recs.append(rec2)
         if self.numofmodel == 4:
             rec.gmax = 0
         if self.numofmodel == 5:
-            rec.gmax = 6
-            rec2.gmax = 2
+            rec.gmax = 1
+            rec2.gmax = 0.5
         h.setpointer(diff._ref_atp, 'patp', rec)
         self.recs.append(rec)
         self.diffs.append(diff)

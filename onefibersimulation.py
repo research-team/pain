@@ -107,7 +107,7 @@ if __name__ == '__main__':
     if numofmodel < 1 or numofmodel > 14:
         print("ERROR! Please input model number in range 1...14")
     else:
-        cell = cfiber(250, 1, 0, 15000, True, numofmodel)
+        cell = cfiber(250, 0.25, 0, 15000, True, numofmodel)
         for sec in h.allsec():
             h.psection(sec=sec) #show parameters of each section
         branch_vec, t_vec = set_recording_vectors(cell.branch)
