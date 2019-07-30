@@ -153,7 +153,7 @@ class cfiber(object):
             sec.insert('Nav1_3')
             sec.insert('extracellular')
             if self.numofmodel == 8 or self.numofmodel >= 11:
-                sec.gbar_navv1p8 = 0.2
+                sec.gbar_navv1p8 = 0.22
             elif self.numofmodel == 7:
                 sec.gbar_navv1p8 = 0.1
             else:
@@ -174,9 +174,9 @@ class cfiber(object):
             sec.celsiusT_nakpump = 37
         for sec in self.stimsec:
             if self.numofmodel == 13 or self.numofmodel == 14:
-                self.add_5HTreceptors(sec, 10, 9)
+                self.add_5HTreceptors(sec, 10, 1)
             else:
-                self.add_P2Xreceptors(sec, 10, 2.5)
+                self.add_P2Xreceptors(sec, 10, 2)
     def add_P2Xreceptors(self, compartment, time, g):
         '''
         Adds P2X3 receptors
@@ -196,7 +196,10 @@ class cfiber(object):
             diff.h = self.distances.get(compartment)
             diff.tx1 = time
             diff.Deff = 0.8
-            diff.c0cleft = 1
+            if self.numofmodel == 4 or self.numofmodel == 5:
+                diff.c0cleft = 10
+            else:
+                diff.c0cleft = 1
             if self.numofmodel == 1:
                 diff.k = 0
             elif self.numofmodel == 3:
@@ -221,8 +224,8 @@ class cfiber(object):
         if self.numofmodel == 4:
             rec.gmax = 0
         if self.numofmodel == 5:
-            rec.gmax = 1
-            rec2.gmax = 0.5
+            rec.gmax = 0.2
+            rec2.gmax = 0.2
         h.setpointer(diff._ref_atp, 'patp', rec)
         self.recs.append(rec)
         self.diffs.append(diff)
@@ -245,15 +248,15 @@ class cfiber(object):
             diff.h = self.distances.get(compartment)
             diff.tx1 = time
             if self.numofmodel == 14:
-                diff.a = 100
+                diff.a = 0.25
             else:
                 diff.a = 0
-            diff.Deff = 0.004
+            diff.Deff = 0.2
             diff.c0cleft = 3
         else:
             diff = h.slow_5HT(compartment(0.5))
             diff.h = self.distances.get(compartment)
-            diff.tx1 = time + 0 + (diff.h/50)*1000
+            diff.tx1 = time + 0 + (diff.h/50)*10#00
             diff.c0cleft = 3
         rec = h.r5ht3a(compartment(0.5))
         rec.gmax = g

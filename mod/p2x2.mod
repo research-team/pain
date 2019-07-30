@@ -63,7 +63,7 @@ INITIAL {
 
 BREAKPOINT {
 	SOLVE kstates METHOD sparse
-	g = gmax*(O6 + O7)*(1e+9)	
+	g = gmax*(O6 + O7)*(1e+6)	
 	i = g * (v - Ev)
 }
 
