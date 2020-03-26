@@ -11,11 +11,11 @@ from onefibersimulation import balance
 
 #paralleling NEURON interface
 pc = h.ParallelContext()
-rank = int(pc.id()) 
+rank = int(pc.id())
 nhost = int(pc.nhost())
 
 #parameters
-cell_number = int(sys.argv[4]) # number of neurons 
+cell_number = int(sys.argv[4]) # number of neurons
 fibers = []
 nclist = []
 spike_times_vec = h.Vector()
@@ -36,7 +36,12 @@ def addfibers(num = cell_number):
     global fibers, rank, nhost, spike_times_vec, id_vec
     gids = []
     for i in range(rank, num, nhost):
-        cell = cfiber(250, random.uniform(0.2, 3), random.randint(100, 500), random.randint(100, 1000), False, random.randint(int(sys.argv[5]), int(sys.argv[6])))
+        # if i == 0:
+        #     nummodel = 5
+        # else:
+        #
+        nummodel = 8
+        cell = cfiber(250, random.uniform(0.2, 3), random.randint(100, 500), random.randint(100, 1000), False, nummodel)
         fibers.append(cell)
         pc.set_gid2node(i, rank)
         nc = cell.connect2target(None)
@@ -47,7 +52,7 @@ def addfibers(num = cell_number):
     return gids
 
 def spike_record(pool):
-    ''' Records spikes from gids 
+    ''' Records spikes from gids
     Parameters
     ----------
     pool: list
@@ -65,8 +70,8 @@ def spike_record(pool):
         v_vec.append(vec)
     return v_vec
 
-def simulate(pool, tstop=300, vinit=-55):
-    ''' simulation control 
+def simulate(pool, tstop=60000, vinit=-55):
+    ''' simulation control
     Parameters
     ----------
     cell: NEURON cell
@@ -98,7 +103,7 @@ def finish():
     h.quit()
 
 def spikeout(pool, name, v_vec):
-    ''' Reports simulation results 
+    ''' Reports simulation results
     Parameters
     ----------
     pool: list
@@ -108,7 +113,7 @@ def spikeout(pool, name, v_vec):
     v_vec: list of h.Vector()
         recorded voltage
     '''
-    global rank 
+    global rank
     pc.barrier()
     for i in range(nhost):
         if i == rank:
@@ -120,7 +125,7 @@ def spikeout(pool, name, v_vec):
         pc.barrier()
 
 def spiketimeout(file_name):
-    ''' Reports simulation results 
+    ''' Reports simulation results
     Parameters
     ----------
     pool: list
@@ -154,6 +159,6 @@ if __name__ == '__main__':
     simulate(pool)
     print("- "*10, "\nend")
     spikeout(pool, "vext", vext)
-    spiketimeout("./results/out.spk")
+    spiketimeout("./out.spk")
     #if (nhost > 1):
     finish()

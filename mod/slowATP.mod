@@ -13,7 +13,7 @@ UNITS{
 CONSTANT {
 	PI=3.1415927
 }
-PARAMETER { 
+PARAMETER {
 	c0cleft = 1 (uM):initial quantity atp
 	h(um)
 	tx1(ms)
@@ -44,9 +44,5 @@ UNITSOFF
 }
 NET_RECEIVE (weight)
 {
-tx1=t 
+tx1=t
 }
-
-
-
-

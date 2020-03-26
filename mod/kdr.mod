@@ -6,8 +6,9 @@ TITLE K-DR channel
 NEURON {
 	SUFFIX kdr
 	USEION k READ ek WRITE ik
-        RANGE gkdr,gbar,ik, vhalfn
+  RANGE gkdr,gbar,ik, vhalfn
 	GLOBAL ninf,taun
+	POINTER im
 }
 
 UNITS {
@@ -18,13 +19,13 @@ UNITS {
 
 PARAMETER {
 	v (mV)
-        ek (mV)		: must be explicitely def. in hoc
+  ek (mV)		: must be explicitely def. in hoc
 	celsius	= 37	(degC)
 	gbar=.003 (mho/cm2)
-        vhalfn=13   (mV)
-        a0n=0.02      (/ms)
-        zetan=-3    (1)
-        gmn=0.7  (1)
+  vhalfn=13   (mV)
+  a0n=0.02      (/ms)
+  zetan=-3    (1)
+  gmn=0.7  (1)
 	nmax=2  (1)
 	q10=1
 }
@@ -36,13 +37,15 @@ STATE {
 
 ASSIGNED {
 	ik (mA/cm2)
-        ninf
-        gkdr
-        taun
+	im
+  ninf
+  gkdr
+  taun
 }
 
 BREAKPOINT {
 	SOLVE states METHOD cnexp
+	if (im > 0) {gbar = 0}
 	gkdr = gbar*n*n
 	ik = gkdr*(v-ek)
 
@@ -55,11 +58,11 @@ INITIAL {
 
 
 FUNCTION alpn(v(mV)) {
-  alpn = exp(1.e-3*zetan*(v-vhalfn)*9.648e4/(8.315*(273.16+celsius))) 
+  alpn = exp(1.e-3*zetan*(v-vhalfn)*9.648e4/(8.315*(273.16+celsius)))
 }
 
 FUNCTION betn(v(mV)) {
-  betn = exp(1.e-3*zetan*gmn*(v-vhalfn)*9.648e4/(8.315*(273.16+celsius))) 
+  betn = exp(1.e-3*zetan*gmn*(v-vhalfn)*9.648e4/(8.315*(273.16+celsius)))
 }
 
 DERIVATIVE states {     : exact when v held constant; integrates over dt step

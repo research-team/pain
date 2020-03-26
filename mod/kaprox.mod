@@ -5,9 +5,10 @@ TITLE K-A channel from Klee Ficker and Heinemann
 NEURON {
     SUFFIX kap
     USEION k READ ek WRITE ik
-        RANGE gbar,gka,ik
-        RANGE ninf,linf,taul,taun
-        GLOBAL lmin,nscale,lscale
+    RANGE gbar,gka,ik
+    RANGE ninf,linf,taul,taun
+    GLOBAL lmin,nscale,lscale
+    POINTER im
 }
 
 UNITS {
@@ -51,12 +52,13 @@ STATE {
 
 ASSIGNED {
 	ik (mA/cm2)
-        ninf
-        linf      
-        taul  (ms)
-        taun  (ms)
-        gka   (mho/cm2)
-        qt
+  im
+  ninf
+  linf
+  taul  (ms)
+  taun  (ms)
+  gka   (mho/cm2)
+  qt
 }
 
 INITIAL {
@@ -64,11 +66,12 @@ INITIAL {
         n=ninf
         l=linf
         gka = gbar*n*l
-	ik = gka*(v-ek)
-}        
+	      ik = gka*(v-ek)
+}
 
 BREAKPOINT {
 	SOLVE states METHOD cnexp
+  if (im > 0) {gbar = 0}
 	gka = gbar*n*l
 	ik = gka*(v-ek)
 
@@ -83,21 +86,21 @@ DERIVATIVE states {
 FUNCTION alpn(v(mV)) {
 LOCAL zeta
   zeta=zetan+pw/(1+exp((v-tq)/qq))
-  alpn = exp(1.e-3*zeta*(v-vhalfn)*9.648e4(degC/mV)/(8.315*(273.16+celsius))) 
+  alpn = exp(1.e-3*zeta*(v-vhalfn)*9.648e4(degC/mV)/(8.315*(273.16+celsius)))
 }
 
 FUNCTION betn(v(mV)) {
 LOCAL zeta
   zeta=zetan+pw/(1+exp((v-tq)/qq))
-  betn = exp(1.e-3*zeta*gmn*(v-vhalfn)*9.648e4(degC/mV)/(8.315*(273.16+celsius))) 
+  betn = exp(1.e-3*zeta*gmn*(v-vhalfn)*9.648e4(degC/mV)/(8.315*(273.16+celsius)))
 }
 
 FUNCTION alpl(v(mV)) {
-  alpl = exp(1.e-3*zetal*(v-vhalfl)*9.648e4(degC/mV)/(8.315*(273.16+celsius))) 
+  alpl = exp(1.e-3*zetal*(v-vhalfl)*9.648e4(degC/mV)/(8.315*(273.16+celsius)))
 }
 
 FUNCTION betl(v(mV)) {
-  betl = exp(1.e-3*zetal*gml*(v-vhalfl)*9.648e4(degC/mV)/(8.315*(273.16+celsius))) 
+  betl = exp(1.e-3*zetal*gml*(v-vhalfl)*9.648e4(degC/mV)/(8.315*(273.16+celsius)))
 }
 LOCAL facn,facl
 
@@ -130,17 +133,3 @@ PROCEDURE rates(v (mV)) { :callable from hoc
         taul=taul/lscale
         facl = (1 - exp(-dt/taul))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -8,23 +8,23 @@ class cfiber(object):
     C-fiber class with parameters:
     L: int (mkM)
         length of compartment
-    d: float 
+    d: float
         diameter of fiber
     num: int
         number of compartments
     coordinates: dict (updates by position())
         coordinates of each section
-    zpozition: int 
+    zpozition: int
         z - coordinate for few cells simulation
     fast_diff: bool
         Is there fast diffusion?
-          -Yes: True 
+          -Yes: True
           -No: False
     diffs: list
         list of diffusion mechanisms (NEURON staff)
     recs: list
         list of receptors mechanisms (NEURON staff)
-    '''      
+    '''
     def __init__(self, L, d, zpozition, x_application, fast_diff, numofmodel):
         self.coordinates = dict()
         self.distances = dict()
@@ -40,7 +40,7 @@ class cfiber(object):
         if self.numofmodel == 11 or self.numofmodel == 12:
             self.num = 170
         else:
-            self.num = 120
+            self.num = 10
         self.create_sections()
         self.build_topology()
         self.build_subsets()
@@ -56,7 +56,7 @@ class cfiber(object):
         self.stimsec = [h.Section(name='stimsec[%d]' % i) for i in range(self.num)]
     def build_topology(self):
         '''
-        Connects sections 
+        Connects sections
         '''
         self.stimsec[0].connect(self.branch(0), 1)
         if self.numofmodel == 11 or self.numofmodel == 12:
@@ -84,7 +84,7 @@ class cfiber(object):
         h.define_shape() # Translate into 3D points.
     def position(self):
         '''
-        Adds 3D position 
+        Adds 3D position
         '''
         if self.numofmodel == 11 or self.numofmodel == 12:
             h.pt3dclear()
@@ -121,7 +121,7 @@ class cfiber(object):
               i+=1
     def distance(self):
         '''
-        Adds distances from application for every compartment 
+        Adds distances from application for every compartment
         '''
         #self.distances.clear()
         if self.numofmodel == 11 or self.numofmodel == 12:
@@ -135,7 +135,7 @@ class cfiber(object):
                 self.distances.update({compartment: distance})
     def define_biophysics(self):
         '''
-        Adds channels and their parameters 
+        Adds channels and their parameters
         '''
         for sec in self.all: # 'all' defined in build_subsets
             sec.Ra = 35  # Axial resistance in Ohm * cm
@@ -147,13 +147,25 @@ class cfiber(object):
             sec.insert('nakpump')
             sec.insert('nattxs')
             sec.insert('kdr')
+            sec.insert('iKCa')
             sec.insert('kad')
             sec.insert('kap')
             sec.insert('leak')
             sec.insert('Nav1_3')
+            sec.insert('iCaL')
+            sec.insert('CaIntraCellDyn')
             sec.insert('extracellular')
+            ap_diff = h.AtP_slow(sec(0.5))
+            ap_diff.h = self.distances.get(sec)
+            ap_diff.tx1 = 1000 + 0 + (ap_diff.h/1250)*1000
+            ap_diff.c0cleft = 100
+            self.diffs.append(ap_diff)
+            for seg in sec:
+                h.setpointer(ap_diff._ref_atp, 'im', seg.kdr)
+                h.setpointer(ap_diff._ref_atp, 'im', seg.kad)
+                h.setpointer(ap_diff._ref_atp, 'im', seg.kap)
             if self.numofmodel == 8 or self.numofmodel >= 11:
-                sec.gbar_navv1p8 = 0.22
+                sec.gbar_navv1p8 = 0.2
             elif self.numofmodel == 7:
                 sec.gbar_navv1p8 = 0.1
             else:
@@ -161,6 +173,11 @@ class cfiber(object):
             sec.gbar_kdr = 0.01
             sec.gbar_kad = 0.1
             sec.gbar_kap = 0.1
+            sec.gbar_iKCa = 0.0015
+            sec.depth_CaIntraCellDyn = 0.1
+            sec.cai_tau_CaIntraCellDyn = 2.0
+            sec.cai_inf_CaIntraCellDyn = 50.0e-6
+            sec.pcabar_iCaL = 0.0001
             if self.numofmodel == 6:
                 sec.gbar_nattxs = 0.2
             else:
@@ -176,20 +193,20 @@ class cfiber(object):
             if self.numofmodel == 13 or self.numofmodel == 14:
                 self.add_5HTreceptors(sec, 10, 1)
             else:
-                self.add_P2Xreceptors(sec, 10, 2)
+                self.add_P2Xreceptors(sec, 10, 3)
     def add_P2Xreceptors(self, compartment, time, g):
         '''
         Adds P2X3 receptors
         Parameters
         ----------
         compartment: section of NEURON cell
-            part of neuron 
+            part of neuron
         x: int
             x - coordinate of ATP application
         time: int (ms)
             time of ATP application
         g: float
-            receptor conductance 
+            receptor conductance
         '''
         if self.fast_diff:
             diff = h.AtP_42(compartment(0.5))
@@ -235,13 +252,13 @@ class cfiber(object):
         Parameters
         ----------
         compartment: section of NEURON cell
-            part of neuron 
+            part of neuron
         x: int
             x - coordinate of serotonin application
         time: int (ms)
             time of serotonin application
         g: float
-            receptor conductance 
+            receptor conductance
         '''
         if self.fast_diff:
             diff = h.diff_5HT(compartment(0.5))
@@ -262,21 +279,21 @@ class cfiber(object):
         rec.gmax = g
         h.setpointer(diff._ref_serotonin, 'serotonin', rec)
         self.diffs.append(diff)
-        self.recs.append(rec)      
+        self.recs.append(rec)
     def build_subsets(self):
         '''
         adds sections in NEURON SectionList
         '''
         self.all = h.SectionList()
         for sec in h.allsec():
-          self.all.append(sec=sec)  
+          self.all.append(sec=sec)
     def connect2target(self, target):
         '''
-        Adds presynapses 
+        Adds presynapses
         Parameters
         ----------
         target: NEURON cell
-            target neuron 
+            target neuron
         Returns
         -------
         nc: NEURON NetCon
