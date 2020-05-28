@@ -8,7 +8,7 @@ NEURON {
 	USEION k READ ek WRITE ik
   RANGE gkdr,gbar,ik, vhalfn
 	GLOBAL ninf,taun
-	POINTER im
+	: POINTER im
 }
 
 UNITS {
@@ -37,7 +37,7 @@ STATE {
 
 ASSIGNED {
 	ik (mA/cm2)
-	im
+	: im
   ninf
   gkdr
   taun
@@ -45,7 +45,7 @@ ASSIGNED {
 
 BREAKPOINT {
 	SOLVE states METHOD cnexp
-	if (im > 0) {gbar = 0}
+	: if (im > 0) {gbar = 0}
 	gkdr = gbar*n*n
 	ik = gkdr*(v-ek)
 

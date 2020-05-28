@@ -40,12 +40,12 @@ def balance(cell, vinit=-55):
         else:
             sec.gnaleak_leak = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump) / (vinit - sec.ena)
 
-        if ((-(sec.ik_kdr + sec.ik_iKCa + sec.ik_nakpump + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)) < 0):
-            sec.pumpik_extrapump = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_iKCa + sec.ik_kap + sec.ik_kad)
+        if ((-(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)) < 0):
+            sec.pumpik_extrapump = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad)
         else:
-            sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_iKCa + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)
+            sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)
 
-def simulate(cell, tstop=5000, vinit=-55):
+def simulate(cell, tstop=300, vinit=-55):
     ''' simulation control
     Parameters
     ----------
@@ -70,7 +70,7 @@ def simulate(cell, tstop=5000, vinit=-55):
         running_ = 1
         if cell.numofmodel == 9:
             dl = 0
-            dt = 120000
+            dt = 60000
         elif cell.numofmodel == 10:
             dl = 1000
             dt = 40
@@ -78,12 +78,15 @@ def simulate(cell, tstop=5000, vinit=-55):
             dl = 800
             dt = 50
         h.stdinit()
-        for n in range(2):
+        for n in range(4):
             cell.x_application = cell.x_application + dl
             cell.distance()
             for item in cell.diffs:
                 item.tx1 = h.t + 1
                 item.initial = item.atp
+                # if n == 0:
+                #     item.c0cleft = 0.01#item.c0cleft
+                # else:
                 item.c0cleft = item.c0cleft
                 item.h = cell.distances.get(cell.diffusions.get(item))
             h.continuerun(h.t+dt)
@@ -99,9 +102,6 @@ def show_output(v_vec, t_vec):
         recorded time
     '''
     dend_plot = pyplot.plot(t_vec, v_vec)
-    f = open('./res.txt', 'w')
-    for v in list(v_vec):
-        f.write(str(v)+"\n")
     pyplot.xlabel('time (ms)')
     pyplot.ylabel('mV')
 
@@ -111,14 +111,15 @@ if __name__ == '__main__':
         print("ERROR! Please input model number in range 1...14")
     else:
         cell = cfiber(250, 0.25, 0, 1500, True, numofmodel)
-        # stim = h.IClamp(cell.branch(1))
-        # stim.delay = 5
-        # stim.dur = 1
-        # stim.amp = 0.1
         for sec in h.allsec():
             h.psection(sec=sec) #show parameters of each section
-        branch_vec, t_vec = set_recording_vectors(cell.stimsec[1])
+        branch_vec, t_vec = set_recording_vectors(cell.branch)
+        # branch_vec1, t_vec1 = set_recording_vectors(cell.stimsec[1])
+        # branch_vec2, t_vec2 = set_recording_vectors(cell.stimsec[4])
         print("Number of model - ",cell.numofmodel)
         simulate(cell)
         show_output(branch_vec, t_vec)
+        # show_output(branch_vec1, t_vec1)
+        # show_output(branch_vec2, t_vec2)
+
         pyplot.show()

@@ -15,7 +15,7 @@ rank = int(pc.id())
 nhost = int(pc.nhost())
 
 #parameters
-cell_number = int(sys.argv[4]) # number of neurons
+cell_number = 4 #int(sys.argv[4]) # number of neurons
 fibers = []
 nclist = []
 spike_times_vec = h.Vector()
@@ -41,7 +41,7 @@ def addfibers(num = cell_number):
         # else:
         #
         nummodel = 8
-        cell = cfiber(250, random.uniform(0.2, 3), random.randint(100, 500), random.randint(100, 1000), False, nummodel)
+        cell = cfiber(500, random.uniform(0.2, 3), random.randint(100, 500), random.randint(100, 1000), False, nummodel)
         fibers.append(cell)
         pc.set_gid2node(i, rank)
         nc = cell.connect2target(None)
@@ -70,7 +70,7 @@ def spike_record(pool):
         v_vec.append(vec)
     return v_vec
 
-def simulate(pool, tstop=60000, vinit=-55):
+def simulate(pool, tstop=50000, vinit=-55):
     ''' simulation control
     Parameters
     ----------

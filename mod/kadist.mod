@@ -9,7 +9,7 @@ NEURON {
         RANGE gbar,gka,ik
         RANGE ninf,linf,taul,taun
         GLOBAL lmin,nscale,lscale
-        POINTER im
+        : POINTER im
 }
 
 UNITS {
@@ -54,7 +54,7 @@ STATE {
 
 ASSIGNED {
 	ik (mA/cm2)
-  im
+  : im
   ninf
   linf
   taul   (ms)
@@ -73,7 +73,7 @@ INITIAL {
 
 BREAKPOINT {
 	SOLVE states METHOD cnexp
-  if (im > 0) {gbar = 0}
+  : if (im > 0) {gbar = 0}
 	gka = gbar*n*l
 	ik = gka*(v-ek)
 }
