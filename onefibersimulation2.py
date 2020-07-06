@@ -62,7 +62,7 @@ def balance(cell, vinit=-70):
         else:
             sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump  + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)
 
-def simulate(cell, tstop=1000, vinit=-70):
+def simulate(cell, tstop=150, vinit=-70):
     ''' simulation control
     Parameters
     ----------
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     # stim.amp = 0.1
     # for sec in h.allsec():
     #     h.psection(sec=sec) #show parameters of each section
-    v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v_vec, t_vec = set_recording_vectors(cell.axon2.node[3])
+    v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v_vec, t_vec = set_recording_vectors(cell.axon1.node[13])
     # print("Number of model - ",cell.numofmodel)
     simulate(cell)
     show_output(v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v_vec, t_vec)

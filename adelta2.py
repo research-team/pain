@@ -65,8 +65,8 @@ class adelta2(object):
     pass
 
   def add_receptors(self):
-      self.axon2.node[0].connect(self.axon1.node[len(self.axon1.node)-1])
-      self.axon3.node[0].connect(self.axon1.node[len(self.axon1.node)-1])
+      self.axon2.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
+      self.axon3.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
       self.position(self.axon1, 0, 0)
       # self.distance(self.axon1)
       # print(self.distances.get(self.axon1.node[len(self.axon1.node)-1]))
@@ -100,17 +100,18 @@ class adelta2(object):
       g: float
           receptor conductance
       '''
-      x = 13500
-      y = 1800
-      z = 0
+      x = [13500, 13500]
+      y = [1800, -1800]
+      z = [0, 0]
+
       if self.fast_diff:
           for i in range(2):
               diff = h.AtP_42(compartment(0.5))
-              if i > 0:
-                  y = y*(-1)
-              diff.h = self.distance(compartment, x, y, z)
+              # if i > 0:
+              #     y = y*(-1)
+              diff.h = self.distance(compartment, x[i], y[i], z[i])
               print(diff.h)
-              diff.tx1 = time + i*70
+              diff.tx1 = time + i*35
               diff.Deff = 0.8
               diff.c0cleft = 25
               diff.k = 0.0#1

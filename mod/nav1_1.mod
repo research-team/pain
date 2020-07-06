@@ -17,8 +17,8 @@ NEURON {
 PARAMETER{
     gnabar = 0.008 (S/cm2)
     ena = 55 (mV)
-    vhminf = -35
-    kminf = 5.5
+    vhminf = -40
+    kminf = 7.5
     amtaul = 0.006
     bmtaul = 0.08
     cmtaul = -55

@@ -113,7 +113,7 @@ class axon(object):
     '''
     for sec in self.node:
       sec.Ra = self.rhoa/20000
-      sec.cm = 2
+      sec.cm = 1
       sec.insert('extracellular')
       sec.xraxial[1] = self.Rpn0
       sec.xg[1] = 1e10
@@ -137,15 +137,15 @@ class axon(object):
       sec.insert('iCaL')
       sec.insert('CaIntraCellDyn')
 
-      sec.gbar_navv1p8 = 0.1
-      sec.gnabar_nav1p1 = 0.4
-      sec.gnabar_nav1p6 = 0.4
+      sec.gbar_navv1p8 = 0.15
+      sec.gnabar_nav1p1 = 0.25
+      sec.gnabar_nav1p6 = 0.25
       sec.gbar_kdr = 0.0#1
       sec.gkbar_kv1 = 0.1
       sec.gkbar_kv3 = 0.2
       sec.gkbar_kv4 = 0.15
-      sec.gbar_nattxs = 0.2
-      sec.gbar_Nav1_3 = 0.2
+      sec.gbar_nattxs = 0.25
+      sec.gbar_Nav1_3 = 0.25
       sec.g_pas = 0.002
       sec.e_pas = -70
       sec.gbar_iKCa = 0.015
