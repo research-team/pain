@@ -40,7 +40,7 @@ class cfiber(object):
         if self.numofmodel == 11 or self.numofmodel == 12:
             self.num = 170
         else:
-            self.num = 8
+            self.num = 120
         self.create_sections()
         self.build_topology()
         self.build_subsets()
@@ -133,7 +133,6 @@ class cfiber(object):
             for compartment in self.all:
                 distance = math.sqrt((self.x_application-self.coordinates.get(compartment).get('x'))**2 + (50-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
                 self.distances.update({compartment: distance})
-
     def define_biophysics(self):
         '''
         Adds channels and their parameters
@@ -147,32 +146,45 @@ class cfiber(object):
             sec.insert('naoi')
             sec.insert('nakpump')
             sec.insert('nattxs')
+            sec.insert('nav1p9')
             sec.insert('kdr')
-            sec.insert('kad')
-            sec.insert('kap')
+            sec.insert('kv1')
+            sec.insert('kv2')
+            sec.insert('kv4')
             sec.insert('leak')
             sec.insert('Nav1_3')
             sec.insert('extracellular')
+            sec.insert('iKCa')
+            sec.insert('iCaL')
+            sec.insert('CaIntraCellDyn')
             if self.numofmodel == 8 or self.numofmodel >= 11:
                 sec.gbar_navv1p8 = 0.22
+                sec.gbar_nav1p9 = 0.0004
             elif self.numofmodel == 7:
                 sec.gbar_navv1p8 = 0.1
             else:
-                sec.gbar_navv1p8 = 0.23
+                sec.gbar_navv1p8 = 0
             sec.gbar_kdr = 0.01
-            sec.gbar_kad = 0.1
-            sec.gbar_kap = 0.1
+            sec.gkbar_kv1 = 0.0002
+            sec.gkbar_kv2 = 0.002
+            sec.gkbar_kv4 = 0.011
             if self.numofmodel == 6:
                 sec.gbar_nattxs = 0.2
             else:
                 sec.gbar_nattxs = 0.1
             sec.gbar_Nav1_3 = 0.2
+            sec.gbar_nav1p9 = 0.00001
             sec.smalla_nakpump = -0.0047891
             sec.theta_naoi = 0.029
             sec.theta_koi = 0.029
             sec.celsiusT_nattxs = 37
             sec.celsiusT_navv1p8 = 37
             sec.celsiusT_nakpump = 37
+            sec.gbar_iKCa = 0.0001
+            sec.depth_CaIntraCellDyn = 0.1
+            sec.cai_tau_CaIntraCellDyn = 2.0
+            sec.cai_inf_CaIntraCellDyn = 50.0e-6
+            sec.pcabar_iCaL = 0.0001
         for sec in self.stimsec:
             if self.numofmodel == 13 or self.numofmodel == 14:
                 self.add_5HTreceptors(sec, 10, 1)

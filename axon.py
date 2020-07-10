@@ -138,8 +138,8 @@ class axon(object):
       sec.insert('CaIntraCellDyn')
 
       sec.gbar_navv1p8 = 0.15
-      sec.gnabar_nav1p1 = 0.25
-      sec.gnabar_nav1p6 = 0.25
+      sec.gnabar_nav1p1 = 0.55
+      sec.gnabar_nav1p6 = 0.55
       sec.gbar_kdr = 0.0#1
       sec.gkbar_kv1 = 0.1
       sec.gkbar_kv3 = 0.2

@@ -35,15 +35,15 @@ def balance(cell, vinit=-55):
         initialized voltage
     '''
     for sec in cell.all:
-        if ((-(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump) / (vinit - sec.ena)) < 0):
-            sec.pumpina_extrapump = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump)
+        if ((-(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)) < 0):
+            sec.pumpina_extrapump = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9)
         else:
-            sec.gnaleak_leak = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump) / (vinit - sec.ena)
+            sec.gnaleak_leak = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)
 
-        if ((-(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)) < 0):
-            sec.pumpik_extrapump = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad)
+        if ((-(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa) / (vinit - sec.ek)) < 0):
+            sec.pumpik_extrapump = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa)
         else:
-            sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad) / (vinit - sec.ek)
+            sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa) / (vinit - sec.ek)
 
 def simulate(cell, tstop=300, vinit=-55):
     ''' simulation control
@@ -110,10 +110,10 @@ if __name__ == '__main__':
     if numofmodel < 1 or numofmodel > 14:
         print("ERROR! Please input model number in range 1...14")
     else:
-        cell = cfiber(250, 0.25, 0, 1500, True, numofmodel)
+        cell = cfiber(250, 0.25, 0, 15020, True, numofmodel)
         for sec in h.allsec():
             h.psection(sec=sec) #show parameters of each section
-        branch_vec, t_vec = set_recording_vectors(cell.branch)
+        branch_vec, t_vec = set_recording_vectors(cell.stimsec[9])
         # branch_vec1, t_vec1 = set_recording_vectors(cell.stimsec[1])
         # branch_vec2, t_vec2 = set_recording_vectors(cell.stimsec[4])
         print("Number of model - ",cell.numofmodel)
