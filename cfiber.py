@@ -48,12 +48,14 @@ class cfiber(object):
         self.position()
         self.distance()
         self.define_biophysics()
+
     def create_sections(self):
         '''
         Creates sections (compartments)
         '''
         self.branch = h.Section(name='branch', cell=self)
         self.stimsec = [h.Section(name='stimsec[%d]' % i) for i in range(self.num)]
+
     def build_topology(self):
         '''
         Connects sections
@@ -71,6 +73,7 @@ class cfiber(object):
         else:
             for i in range(1, len(self.stimsec)):
                 self.stimsec[i].connect(self.stimsec[i-1])
+
     def define_geometry(self):
         '''
         Adds length and diameter to sections
@@ -82,6 +85,7 @@ class cfiber(object):
         self.branch.diam = self.diam
         self.branch.nseg = 1
         h.define_shape() # Translate into 3D points.
+
     def position(self):
         '''
         Adds 3D position
@@ -119,20 +123,23 @@ class cfiber(object):
               xyz = dict(x=self.L*(i+1), y=0, z=0)
               self.coordinates.update({sec: xyz})
               i+=1
+
     def distance(self):
         '''
         Adds distances from application for every compartment
         '''
         #self.distances.clear()
         if self.numofmodel == 11 or self.numofmodel == 12:
-            self.x_application = -400
+            self.x_application = 0
+            self.dl = 5050
             for compartment in self.all:
-                distance = math.sqrt((30050-self.coordinates.get(compartment).get('x'))**2 + (self.x_application-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
+                distance = math.sqrt((self.dl-self.coordinates.get(compartment).get('x'))**2 + (self.x_application-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
                 self.distances.update({compartment: distance})
         else:
             for compartment in self.all:
                 distance = math.sqrt((self.x_application-self.coordinates.get(compartment).get('x'))**2 + (50-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
                 self.distances.update({compartment: distance})
+
     def define_biophysics(self):
         '''
         Adds channels and their parameters
@@ -159,7 +166,7 @@ class cfiber(object):
             sec.insert('CaIntraCellDyn')
             if self.numofmodel == 8 or self.numofmodel >= 11:
                 sec.gbar_navv1p8 = 0.22
-                sec.gbar_nav1p9 = 0.0004
+                sec.gbar_nav1p9 = 0.001
             elif self.numofmodel == 7:
                 sec.gbar_navv1p8 = 0.1
             else:
@@ -187,9 +194,11 @@ class cfiber(object):
             sec.pcabar_iCaL = 0.0001
         for sec in self.stimsec:
             if self.numofmodel == 13 or self.numofmodel == 14:
-                self.add_5HTreceptors(sec, 10, 1)
+                self.add_P2Xreceptors(sec, 10, 2)
             else:
                 self.add_P2Xreceptors(sec, 10, 2)
+                self.add_5HTreceptors(sec, 10, 5)
+
     def add_P2Xreceptors(self, compartment, time, g):
         '''
         Adds P2X3 receptors
@@ -242,6 +251,7 @@ class cfiber(object):
         h.setpointer(diff._ref_atp, 'patp', rec)
         self.recs.append(rec)
         self.diffs.append(diff)
+
     def add_5HTreceptors(self, compartment, time, g):
         '''
         Adds 5HT receptors
@@ -271,11 +281,13 @@ class cfiber(object):
             diff.h = self.distances.get(compartment)
             diff.tx1 = time + 0 + (diff.h/50)*10#00
             diff.c0cleft = 3
+        self.diffusions.update({diff: compartment})
         rec = h.r5ht3a(compartment(0.5))
         rec.gmax = g
         h.setpointer(diff._ref_serotonin, 'serotonin', rec)
         self.diffs.append(diff)
         self.recs.append(rec)
+
     def build_subsets(self):
         '''
         adds sections in NEURON SectionList
@@ -283,6 +295,7 @@ class cfiber(object):
         self.all = h.SectionList()
         for sec in h.allsec():
           self.all.append(sec=sec)
+
     def connect2target(self, target):
         '''
         Adds presynapses

@@ -13,7 +13,8 @@ class adelta2(object):
   number:
     number of nodes of Ranvier
   '''
-  def __init__(self):
+  def __init__(self, dt):
+    self.dt = dt
     self.coordinates = dict()
     self.distances = dict()
     self.diffusions = dict()
@@ -21,11 +22,12 @@ class adelta2(object):
     self.recs = []
     self.axons = []
     self.axon1 = axon(17)
-    self.axon2 = axon(10)
-    self.axon3 = axon(10)
-    self.axons.append(self.axon1)
-    self.axons.append(self.axon2)
-    self.axons.append(self.axon3)
+    # self.axon2 = axon(10)
+    # self.axon3 = axon(10)
+    # self.axon4 = axon(10)
+    # self.axons.append(self.axon1)
+    # self.axons.append(self.axon2)
+    # self.axons.append(self.axon3)
     self.x_application = 5600
     self.fast_diff = True
     self.build_subsets()
@@ -65,26 +67,31 @@ class adelta2(object):
     pass
 
   def add_receptors(self):
-      self.axon2.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
-      self.axon3.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
+      # self.axon2.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
+      # self.axon3.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
+      # self.axon4.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
       self.position(self.axon1, 0, 0)
       # self.distance(self.axon1)
       # print(self.distances.get(self.axon1.node[len(self.axon1.node)-1]))
-      self.position(self.axon2, self.coordinates.get(self.axon1.node[len(self.axon1.node)-1]).get('x'), 100)
-      self.position(self.axon3, self.coordinates.get(self.axon1.node[len(self.axon1.node)-1]).get('x'), -100)
-
+      # self.position(self.axon2, self.coordinates.get(self.axon1.node[len(self.axon1.node)-1]).get('x'), 100)
+      # self.position(self.axon3, self.coordinates.get(self.axon1.node[len(self.axon1.node)-1]).get('x'), -100)
+      # self.position(self.axon4, self.coordinates.get(self.axon1.node[len(self.axon1.node)-1]).get('x'), 10)
       # self.distance(self.axon2)
       # self.distance(self.axon3)
 
-      print(self.coordinates)
+      # print(self.coordinates)
 
       # self.add_5HTreceptors(sec, 10, 1)
       for sec in self.axon1.node:
-          self.add_P2Xreceptors(sec, 20, 10)
-      for sec in self.axon2.node:
-          self.add_P2Xreceptors(sec, 20, 10)
-      for sec in self.axon3.node:
-          self.add_P2Xreceptors(sec, 20, 10)
+          # self.add_5HTreceptors(sec, 20, 35)
+          self.add_P2Xreceptors(sec, 10, 10)
+      # for sec in self.axon2.node:
+      #     # self.add_5HTreceptors(sec, 20, 35)
+      #     self.add_P2Xreceptors(sec, 10, 15)
+      # for sec in self.axon3.node:
+      #     # self.add_5HTreceptors(sec, 20, 35)
+      #     self.add_P2Xreceptors(sec, 10, 15)
+
 
   def add_P2Xreceptors(self, compartment, time, g):
       '''
@@ -100,18 +107,18 @@ class adelta2(object):
       g: float
           receptor conductance
       '''
-      x = [13500, 13500]
-      y = [1800, -1800]
-      z = [0, 0]
+      x = [5000]
+      y = [0, 1800, -1800]
+      z = [0, 0, 0]
 
       if self.fast_diff:
-          for i in range(2):
+          for i in range(len(x)):
               diff = h.AtP_42(compartment(0.5))
               # if i > 0:
               #     y = y*(-1)
               diff.h = self.distance(compartment, x[i], y[i], z[i])
-              print(diff.h)
-              diff.tx1 = time + i*35
+              # print(diff.h)
+              diff.tx1 = time + i*self.dt
               diff.Deff = 0.8
               diff.c0cleft = 25
               diff.k = 0.0#1
@@ -153,23 +160,32 @@ class adelta2(object):
       g: float
           receptor conductance
       '''
+      x = [8000, 13500, 13500]
+      y = [0, 1800, -1800]
+      z = [0, 0, 0]
       if self.fast_diff:
-          diff = h.diff_5HT(compartment(0.5))
-          diff.h = self.distances.get(compartment)
-          diff.tx1 = time
-          diff.a = 0.25
-          diff.Deff = 0.2
-          diff.c0cleft = 3
+          for i in range(len(x)):
+            diff = h.diff_5HT(compartment(0.5))
+            diff.h = self.distance(compartment, x[i], y[i], z[i])
+            diff.tx1 = time + i*self.dt
+            diff.a = 0
+            diff.Deff = 0.2
+            diff.c0cleft = 13
+            rec = h.r5ht3a(compartment(0.5))
+            rec.gmax = g
+            h.setpointer(diff._ref_serotonin, 'serotonin', rec)
+            self.recs.append(rec)
+            self.diffs.append(diff)
       else:
           diff = h.slow_5HT(compartment(0.5))
           diff.h = self.distances.get(compartment)
           diff.tx1 = time + 0 + (diff.h/50)*10#00
           diff.c0cleft = 3
-      rec = h.r5ht3a(compartment(0.5))
-      rec.gmax = g
-      h.setpointer(diff._ref_serotonin, 'serotonin', rec)
-      self.diffs.append(diff)
-      self.recs.append(rec)
+          rec = h.r5ht3a(compartment(0.5))
+          rec.gmax = g
+          h.setpointer(diff._ref_serotonin, 'serotonin', rec)
+          self.diffs.append(diff)
+          self.recs.append(rec)
 
   def connect2target(self, target):
       '''
