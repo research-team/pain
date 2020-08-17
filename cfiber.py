@@ -154,6 +154,7 @@ class cfiber(object):
             sec.insert('nakpump')
             sec.insert('nattxs')
             sec.insert('nav1p9')
+            sec.insert('nav1p1')
             sec.insert('kdr')
             sec.insert('kv1')
             sec.insert('kv2')
@@ -165,12 +166,13 @@ class cfiber(object):
             sec.insert('iCaL')
             sec.insert('CaIntraCellDyn')
             if self.numofmodel == 8 or self.numofmodel >= 11:
-                sec.gbar_navv1p8 = 0.22
+                sec.gbar_navv1p8 = 0.2
                 sec.gbar_nav1p9 = 0.001
             elif self.numofmodel == 7:
                 sec.gbar_navv1p8 = 0.1
             else:
                 sec.gbar_navv1p8 = 0
+            sec.gnabar_nav1p1 = 0.0005
             sec.gbar_kdr = 0.01
             sec.gkbar_kv1 = 0.0002
             sec.gkbar_kv2 = 0.002
@@ -178,13 +180,13 @@ class cfiber(object):
             if self.numofmodel == 6:
                 sec.gbar_nattxs = 0.2
             else:
-                sec.gbar_nattxs = 0.1
-            sec.gbar_Nav1_3 = 0.2
+                sec.gbar_nattxs = 0.3
+            sec.gbar_Nav1_3 = 0.1
             sec.gbar_nav1p9 = 0.00001
             sec.smalla_nakpump = -0.0047891
             sec.theta_naoi = 0.029
             sec.theta_koi = 0.029
-            sec.celsiusT_nattxs = 37
+            # sec.celsiusT_nattxs = 37
             sec.celsiusT_navv1p8 = 37
             sec.celsiusT_nakpump = 37
             sec.gbar_iKCa = 0.0001
@@ -192,12 +194,13 @@ class cfiber(object):
             sec.cai_tau_CaIntraCellDyn = 2.0
             sec.cai_inf_CaIntraCellDyn = 50.0e-6
             sec.pcabar_iCaL = 0.0001
-        for sec in self.stimsec:
-            if self.numofmodel == 13 or self.numofmodel == 14:
-                self.add_P2Xreceptors(sec, 10, 2)
-            else:
-                self.add_P2Xreceptors(sec, 10, 2)
-                self.add_5HTreceptors(sec, 10, 5)
+        # for sec in self.stimsec:
+        #     if self.numofmodel == 13 or self.numofmodel == 14:
+        #         self.add_5HTreceptors(sec, 10, 5)
+        #     else:
+        #         self.add_P2Xreceptors(sec, 10, 2)
+        #         self.add_5HTreceptors(sec, 10, 3)
+
 
     def add_P2Xreceptors(self, compartment, time, g):
         '''

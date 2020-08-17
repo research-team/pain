@@ -37,7 +37,7 @@ def set_recording_vectors(compartment):
     v_vec18.record(compartment(0.5)._ref_ina_navv1p8)
     v_vecka.record(compartment(0.5)._ref_ik_kv2)
     v_veckd.record(compartment(0.5)._ref_ik_kv4)
-    v_vec.record(compartment(0.5)._ref_ik_kv1)
+    v_vec.record(compartment(0.5)._ref_v)
     v_veckca.record(compartment(0.5)._ref_ik_iKCa)
 
     t_vec.record(h._ref_t)
@@ -53,17 +53,17 @@ def balance(cell, vinit=-55):
         initialized voltage
     '''
     for sec in cell.all:
-        if ((-(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)) < 0):
-            sec.pumpina_extrapump = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9)
+        if ((-(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nav1p1 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)) < 0):
+            sec.pumpina_extrapump = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_nav1p1 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9)
         else:
-            sec.gnaleak_leak = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)
+            sec.gnaleak_leak = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_nav1p1 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)
 
         if ((-(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa) / (vinit - sec.ek)) < 0):
             sec.pumpik_extrapump = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa)
         else:
             sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa) / (vinit - sec.ek)
 
-def simulate(cell, tstop=300, vinit=-55):
+def simulate(cell, tstop=400, vinit=-55):
     ''' simulation control
     Parameters
     ----------
@@ -83,7 +83,7 @@ def simulate(cell, tstop=300, vinit=-55):
     h.frecord_init()
     h.tstop = tstop
     h.v_init = vinit
-    # h.run()
+    h.run()
     if cell.numofmodel == 9 or cell.numofmodel == 10 or cell.numofmodel == 12:
         running_ = 1
         if cell.numofmodel == 9:
@@ -94,7 +94,7 @@ def simulate(cell, tstop=300, vinit=-55):
             d_t = 40
         else:
             dl = 800
-            d_t = 15
+            d_t = 10
         h.stdinit()
         for n in range(3):
             cell.x_application = cell.x_application + dl
@@ -127,15 +127,15 @@ def show_output(v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v
         recorded time
     '''
     # pyplot.plot(t_vec, v_vec11, label = 'Nav1.1')
-    pyplot.plot(t_vec, v_vec13, label = 'Nav1.3')
-    pyplot.plot(t_vec, v_vec16, label = 'Nav1.9')
-    pyplot.plot(t_vec, v_vec17, label = 'Nav1.7')
-    pyplot.plot(t_vec, v_vec18, label = 'Nav1.8')
-    pyplot.plot(t_vec, v_vecka, label = 'Kv2')
-    pyplot.plot(t_vec, v_veckd, label = 'Kv4')
+    # pyplot.plot(t_vec, v_vec13, label = 'Nav1.3')
+    # pyplot.plot(t_vec, v_vec16, label = 'Nav1.9')
+    # pyplot.plot(t_vec, v_vec17, label = 'Nav1.7')
+    # pyplot.plot(t_vec, v_vec18, label = 'Nav1.8')
+    # pyplot.plot(t_vec, v_vecka, label = 'Kv2')
+    # pyplot.plot(t_vec, v_veckd, label = 'Kv4')
     # pyplot.clf()
     pyplot.plot(t_vec, v_vec, label = 'Kv1')
-    pyplot.plot(t_vec, v_veckca, label = 'K_Ca')
+    # pyplot.plot(t_vec, v_veckca, label = 'K_Ca')
 
 
 
@@ -155,8 +155,15 @@ if __name__ == '__main__':
         for sec in h.allsec():
             h.psection(sec=sec) #show parameters of each section
         # branch_vec, t_vec = set_recording_vectors(cell.stimsec[9])
-        v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v_vec, v_veckca, t_vec = set_recording_vectors(cell.stimsec[9])
+        v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v_vec, v_veckca, t_vec = set_recording_vectors(cell.branch)
 
+        vc = h.VClamp(0.5, sec=cell.stimsec[9])
+        vc.dur[0] = 10.0
+        vc.dur[1] = 100.0
+        vc.dur[2] = 0.0
+        vc.amp[0] = -55
+        vc.amp[1] = -40
+        vc.amp[2] = 0
         # branch_vec1, t_vec1 = set_recording_vectors(cell.stimsec[1])
         # branch_vec2, t_vec2 = set_recording_vectors(cell.stimsec[4])
         print("Number of model - ",cell.numofmodel)
