@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as pyplot
 import math
+import sys
 #neuron.load_mechanisms("./mod")
 from cfiber import cfiber
 
