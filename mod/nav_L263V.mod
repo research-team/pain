@@ -15,7 +15,7 @@ UNITS {
 
 
 NEURON {
-    SUFFIX nav11_L1670W
+    SUFFIX nav11_L263V
     USEION na READ ena WRITE ina
     RANGE gnabar, ina
     RANGE minf, mtau, hinf, htau, sinf, rinf, rtau, stau, m, h, s, r
@@ -45,6 +45,7 @@ ASSIGNED {
     minf hinf sinf rinf
     mtau (ms) htau (ms) stau (ms) rtau (ms)
     mexp hexp sexp
+    alphar betar
 }
 
 
@@ -77,7 +78,7 @@ DERIVATIVE states{
     s' = (sinf-s)/stau
     r' = (rinf-r)/rtau
 
-    : printf("v: %g,  s: %g,  r: %g, rinf: %g, rtau: %g\n", v, h, r, rinf, rtau)
+    : printf("v: %g,  h: %g,  r: %g, rinf: %g, rtau: %g\n", v, h, r, rinf, rtau)
 
 }
 
@@ -85,31 +86,34 @@ PROCEDURE rates(v (mV)) {   :Computes rate and other constants at current v.
                             :Call once from HOC to initialize inf at resting v.
 
     LOCAL  alpha, beta, sum, q10
-    q10 = 3^((celsiusT - 6.3)/10)
+    q10 = 3^((celsiusT - 30)/10)
 
   TABLE minf, mtau, hinf, htau, sinf, stau, rinf, rtau
   FROM -100 TO 100 WITH 200
 
     :"m" sodium activation system
-    minf = 1/(1+exp(-(v+16.8)/6.1))
-    mtau = 0.1 + 0.35*(1/(1+exp((v+10.3)/8.7)))
+    minf = 1/(1+exp(-(v+26.5)/7.2))
+    mtau = 0.01 :+ 0.05*(1/(1+exp((v+15)/9.7)))
 
     :"h" sodium fast inactivation system
-    hinf = 1/(1+exp((v+47.3)/6.1))
-    htau = 0.2 + 1/(1.8*(exp(v/20.3)))
+    hinf = 1/(1+exp((v+55.3)/6.7))
+    htau = 5.75*exp(0.12*((v-38)/15.232)^2)
 
     :"s" sodium slow inactivation system
-    sinf = 1/(1+exp((v+53.5)/7.6))
-    stau = 2070 + (7.5*exp(((v+68.7)/19.6)^2))
+    sinf = 1/(1+exp((v+55)/5.1))
+    stau = 1525*exp(106*((v+146)/319)^2)
 
-    :"s" sodium slow inactivation system
-    rinf =  1/(1+exp((v+68.3)/7.5))
-    rtau = 3449 + (7.5*exp(((v+68.7)/19.6)^2))
+    alphar = 0.0028*exp((v-16)/144)
+    betar = 0.01*exp((v+10)/10)
+
+    rinf = alphar/(alphar + betar)
+    rtau = 1/(alphar + betar)
 
     mtau=mtau*(1/q10)
     htau=htau*(1/q10)
     stau=stau*(1/q10)
     rtau=rtau*(1/q10)
+
 }
 
 UNITSON

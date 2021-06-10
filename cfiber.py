@@ -1,7 +1,7 @@
 from neuron import h, gui
 import math
 import random
-#neuron.load_mechanisms("./mod")
+# h.load_mechanisms("./mod")
 
 class cfiber(object):
     '''
@@ -48,14 +48,12 @@ class cfiber(object):
         self.position()
         self.distance()
         self.define_biophysics()
-
     def create_sections(self):
         '''
         Creates sections (compartments)
         '''
         self.branch = h.Section(name='branch', cell=self)
         self.stimsec = [h.Section(name='stimsec[%d]' % i) for i in range(self.num)]
-
     def build_topology(self):
         '''
         Connects sections
@@ -81,9 +79,10 @@ class cfiber(object):
         for sec in self.stimsec:
             sec.L = self.L# microns
             sec.diam = self.diam # microns
+            sec.nseg = 4
         self.branch.L = self.L
         self.branch.diam = self.diam
-        self.branch.nseg = 1
+        self.branch.nseg = 3
         h.define_shape() # Translate into 3D points.
 
     def position(self):
@@ -130,10 +129,9 @@ class cfiber(object):
         '''
         #self.distances.clear()
         if self.numofmodel == 11 or self.numofmodel == 12:
-            self.x_application = 0
-            self.dl = 5050
+            self.x_application = -400
             for compartment in self.all:
-                distance = math.sqrt((self.dl-self.coordinates.get(compartment).get('x'))**2 + (self.x_application-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
+                distance = math.sqrt((30050-self.coordinates.get(compartment).get('x'))**2 + (self.x_application-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
                 self.distances.update({compartment: distance})
         else:
             for compartment in self.all:
@@ -147,61 +145,58 @@ class cfiber(object):
         for sec in self.all: # 'all' defined in build_subsets
             sec.Ra = 35  # Axial resistance in Ohm * cm
             sec.cm = 1      # Membrane capacitance in micro Farads / cm^2
-            sec.insert('navv1p8')
+            sec.insert('nav1p8')
             sec.insert('extrapump')
             sec.insert('koi')
             sec.insert('naoi')
             sec.insert('nakpump')
             sec.insert('nattxs')
             sec.insert('nav1p9')
-            sec.insert('nav1p1')
             sec.insert('kdr')
             sec.insert('kv1')
             sec.insert('kv2')
             sec.insert('kv4')
             sec.insert('leak')
+            # sec.insert('nav11_L263V')
             sec.insert('Nav1_3')
             sec.insert('extracellular')
             sec.insert('iKCa')
             sec.insert('iCaL')
             sec.insert('CaIntraCellDyn')
             if self.numofmodel == 8 or self.numofmodel >= 11:
-                sec.gbar_navv1p8 = 0.2
-                sec.gbar_nav1p9 = 0.001
+                sec.gbar_nav1p8= 0.22
+                sec.gbar_nav1p9 = 0.0004
             elif self.numofmodel == 7:
-                sec.gbar_navv1p8 = 0.1
+                sec.gbar_nav1p8 = 0.1
             else:
-                sec.gbar_navv1p8 = 0
-            sec.gnabar_nav1p1 = 0.0005
+                sec.gbar_nav1p8 = 0
             sec.gbar_kdr = 0.01
-            sec.gkbar_kv1 = 0.0002
-            sec.gkbar_kv2 = 0.002
-            sec.gkbar_kv4 = 0.011
+            sec.gkbar_kv1 = 0.002
+            sec.gkbar_kv2 = 0.01
+            sec.gkbar_kv4 = 0.02
             if self.numofmodel == 6:
                 sec.gbar_nattxs = 0.2
             else:
-                sec.gbar_nattxs = 0.3
-            sec.gbar_Nav1_3 = 0.1
-            sec.gbar_nav1p9 = 0.00001
+                sec.gbar_nattxs = 0.2
+            sec.gbar_Nav1_3 = 0.0
+            sec.gbar_nav1p9 = 0.0#001
             sec.smalla_nakpump = -0.0047891
             sec.theta_naoi = 0.029
             sec.theta_koi = 0.029
-            # sec.celsiusT_nattxs = 37
-            sec.celsiusT_navv1p8 = 37
+            sec.celsiusT_nattxs = 37
+            sec.celsiusT_nav1p8= 37
             sec.celsiusT_nakpump = 37
             sec.gbar_iKCa = 0.0001
+            # sec.gnabar_nav11_L263V = 0.5
             sec.depth_CaIntraCellDyn = 0.1
             sec.cai_tau_CaIntraCellDyn = 2.0
             sec.cai_inf_CaIntraCellDyn = 50.0e-6
-            sec.pcabar_iCaL = 0.0001
-        # for sec in self.stimsec:
-        #     if self.numofmodel == 13 or self.numofmodel == 14:
-        #         self.add_5HTreceptors(sec, 10, 5)
-        #     else:
-        #         self.add_P2Xreceptors(sec, 10, 2)
-        #         self.add_5HTreceptors(sec, 10, 3)
-
-
+            sec.pcabar_iCaL = 0.00001
+        for sec in self.stimsec:
+            if self.numofmodel == 13 or self.numofmodel == 14:
+                self.add_5HTreceptors(sec, 10, 1)
+            else:
+                self.add_P2Xreceptors(sec, 10, 50)
     def add_P2Xreceptors(self, compartment, time, g):
         '''
         Adds P2X3 receptors
@@ -217,7 +212,7 @@ class cfiber(object):
             receptor conductance
         '''
         if self.fast_diff:
-            diff = h.AtP_42(compartment(0.5))
+            diff = h.AtP_42(compartment(0.1))
             diff.h = self.distances.get(compartment)
             diff.tx1 = time
             diff.Deff = 0.8
@@ -237,7 +232,7 @@ class cfiber(object):
             diff.tx1 = time + 0 + (diff.h/1250)*1000
             diff.c0cleft = 100
         self.diffusions.update({diff: compartment})
-        rec = h.p2x3(compartment(0.5))
+        rec = h.p2x3(compartment(0.1))
         rec.gmax = g
         rec.Ev = 5
         if self.numofmodel == 4 or self.numofmodel == 5:
@@ -254,7 +249,6 @@ class cfiber(object):
         h.setpointer(diff._ref_atp, 'patp', rec)
         self.recs.append(rec)
         self.diffs.append(diff)
-
     def add_5HTreceptors(self, compartment, time, g):
         '''
         Adds 5HT receptors
@@ -270,7 +264,7 @@ class cfiber(object):
             receptor conductance
         '''
         if self.fast_diff:
-            diff = h.diff_5HT(compartment(0.5))
+            diff = h.diff_5HT(compartment(0.25))
             diff.h = self.distances.get(compartment)
             diff.tx1 = time
             if self.numofmodel == 14:
@@ -284,21 +278,19 @@ class cfiber(object):
             diff.h = self.distances.get(compartment)
             diff.tx1 = time + 0 + (diff.h/50)*10#00
             diff.c0cleft = 3
-        self.diffusions.update({diff: compartment})
         rec = h.r5ht3a(compartment(0.5))
         rec.gmax = g
         h.setpointer(diff._ref_serotonin, 'serotonin', rec)
         self.diffs.append(diff)
         self.recs.append(rec)
-
     def build_subsets(self):
         '''
         adds sections in NEURON SectionList
         '''
         self.all = h.SectionList()
-        for sec in h.allsec():
+        for sec in self.stimsec:
           self.all.append(sec=sec)
-
+        self.all.append(sec=self.branch)
     def connect2target(self, target):
         '''
         Adds presynapses

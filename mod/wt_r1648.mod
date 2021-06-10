@@ -15,10 +15,10 @@ UNITS {
 
 
 NEURON {
-    SUFFIX nav11_L1670W
+    SUFFIX nav11_wt_R1648H
     USEION na READ ena WRITE ina
     RANGE gnabar, ina
-    RANGE minf, mtau, hinf, htau, sinf, rinf, rtau, stau, m, h, s, r
+    RANGE minf, mtau, hinf, htau, sinf, stau, m, h, s, rtau, rinf, r
 }
 
 
@@ -45,6 +45,8 @@ ASSIGNED {
     minf hinf sinf rinf
     mtau (ms) htau (ms) stau (ms) rtau (ms)
     mexp hexp sexp
+    alphar betar
+
 }
 
 
@@ -77,39 +79,42 @@ DERIVATIVE states{
     s' = (sinf-s)/stau
     r' = (rinf-r)/rtau
 
-    : printf("v: %g,  s: %g,  r: %g, rinf: %g, rtau: %g\n", v, h, r, rinf, rtau)
-
 }
 
 PROCEDURE rates(v (mV)) {   :Computes rate and other constants at current v.
                             :Call once from HOC to initialize inf at resting v.
 
     LOCAL  alpha, beta, sum, q10
-    q10 = 3^((celsiusT - 6.3)/10)
+    q10 = 3^((celsiusT - 30)/10)
 
   TABLE minf, mtau, hinf, htau, sinf, stau, rinf, rtau
   FROM -100 TO 100 WITH 200
 
     :"m" sodium activation system
-    minf = 1/(1+exp(-(v+16.8)/6.1))
-    mtau = 0.1 + 0.35*(1/(1+exp((v+10.3)/8.7)))
+    minf = 1/(1+exp(-(v+19.4)/7.9))
+    mtau = 0.2 :23.5*exp(0.008*((v-35.6)/15.5)^2)
 
     :"h" sodium fast inactivation system
-    hinf = 1/(1+exp((v+47.3)/6.1))
-    htau = 0.2 + 1/(1.8*(exp(v/20.3)))
+    hinf = 0.04+0.96/(1+exp((v+62.7)/6.9))
+    htau = 15.049*(0.0145*exp(0.0924*((v-35.5)/13.07)^2))
 
     :"s" sodium slow inactivation system
-    sinf = 1/(1+exp((v+53.5)/7.6))
-    stau = 2070 + (7.5*exp(((v+68.7)/19.6)^2))
+    sinf = 1/(1+exp((v+66.7)/7.8)) :+ 0.14
+    stau = 51769*(0.0174*exp(10.69*((v+5.79)/174.4)^2))
 
-    :"s" sodium slow inactivation system
-    rinf =  1/(1+exp((v+68.3)/7.5))
-    rtau = 3449 + (7.5*exp(((v+68.7)/19.6)^2))
+    :"r" recovery sodium slow inactivation system
+    alphar = 0.00143*exp((v-16)/144)
+    betar = 0.01*exp((v+8)/10)
+
+    rinf = alphar/(alphar + betar)
+    rtau = 1/(alphar + betar)
+
 
     mtau=mtau*(1/q10)
     htau=htau*(1/q10)
     stau=stau*(1/q10)
     rtau=rtau*(1/q10)
+
 }
 
 UNITSON

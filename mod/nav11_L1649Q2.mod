@@ -15,10 +15,10 @@ UNITS {
 
 
 NEURON {
-    SUFFIX nav11_L1670W
+    SUFFIX nav11_L1649Q2
     USEION na READ ena WRITE ina
     RANGE gnabar, ina
-    RANGE minf, mtau, hinf, htau, sinf, rinf, rtau, stau, m, h, s, r
+    RANGE minf, mtau, hinf, htau, sinf, stau, m, h, s
 }
 
 
@@ -42,20 +42,20 @@ ASSIGNED {
     gnat (mho/cm2)
     ena	(mV)
     ina	(mA/cm2)
-    minf hinf sinf rinf
-    mtau (ms) htau (ms) stau (ms) rtau (ms)
+    minf hinf sinf
+    mtau (ms) htau (ms) stau (ms)
     mexp hexp sexp
 }
 
 
 STATE {
-    m h s r
+    m h s
 }
 
 
 BREAKPOINT {
     SOLVE states METHOD cnexp
-    gnat = gnabar*m*m*m*h*s*r
+    gnat = gnabar*m*m*m*h*s
     ina = gnat*(v - ena)
 }
 
@@ -67,7 +67,6 @@ INITIAL{
     m = minf
     h = hinf
     s = sinf
-    r = rinf
 }
 
 DERIVATIVE states{
@@ -75,9 +74,7 @@ DERIVATIVE states{
     m' = (minf-m)/mtau
     h' = (hinf-h)/htau
     s' = (sinf-s)/stau
-    r' = (rinf-r)/rtau
-
-    : printf("v: %g,  s: %g,  r: %g, rinf: %g, rtau: %g\n", v, h, r, rinf, rtau)
+    : printf("v: %g, s: %g, sinf: %g, stau: %g \n", v, s, sinf, stau)
 
 }
 
@@ -85,31 +82,28 @@ PROCEDURE rates(v (mV)) {   :Computes rate and other constants at current v.
                             :Call once from HOC to initialize inf at resting v.
 
     LOCAL  alpha, beta, sum, q10
-    q10 = 3^((celsiusT - 6.3)/10)
+    q10 = 3^((celsiusT - 30)/10)
 
-  TABLE minf, mtau, hinf, htau, sinf, stau, rinf, rtau
+  TABLE minf, mtau, hinf, htau, sinf, stau
   FROM -100 TO 100 WITH 200
 
     :"m" sodium activation system
-    minf = 1/(1+exp(-(v+16.8)/6.1))
-    mtau = 0.1 + 0.35*(1/(1+exp((v+10.3)/8.7)))
+    minf = 1/(1+exp(-(v+23.3)/7))
+    mtau = 0.23 :01 + 0.05*(1/(1+exp((v+5)/9.7)))
+
 
     :"h" sodium fast inactivation system
-    hinf = 1/(1+exp((v+47.3)/6.1))
-    htau = 0.2 + 1/(1.8*(exp(v/20.3)))
+    hinf = 0.08 + (0.92/(1+exp((v+35.3)/7.5)))
+    htau = 1 + (1/((5.16*(exp(v/9.43))) + (1/((exp((v+104.42)/14.12))-1.31))))
+
 
     :"s" sodium slow inactivation system
-    sinf = 1/(1+exp((v+53.5)/7.6))
-    stau = 2070 + (7.5*exp(((v+68.7)/19.6)^2))
-
-    :"s" sodium slow inactivation system
-    rinf =  1/(1+exp((v+68.3)/7.5))
-    rtau = 3449 + (7.5*exp(((v+68.7)/19.6)^2))
+    sinf = 1/(1+exp((v+55)/6.2))
+    stau = 992.7 + (180.2*(31.53*exp(-0.53*((v+73.23)/29.6)^2)))
 
     mtau=mtau*(1/q10)
     htau=htau*(1/q10)
     stau=stau*(1/q10)
-    rtau=rtau*(1/q10)
 }
 
 UNITSON

@@ -15,10 +15,10 @@ UNITS {
 
 
 NEURON {
-    SUFFIX nav11_L1670W
+    SUFFIX nav11_R1648H
     USEION na READ ena WRITE ina
     RANGE gnabar, ina
-    RANGE minf, mtau, hinf, htau, sinf, rinf, rtau, stau, m, h, s, r
+    RANGE minf, mtau, hinf, htau, sinf, stau, m, h, s
 }
 
 
@@ -42,20 +42,21 @@ ASSIGNED {
     gnat (mho/cm2)
     ena	(mV)
     ina	(mA/cm2)
-    minf hinf sinf rinf
-    mtau (ms) htau (ms) stau (ms) rtau (ms)
+    minf hinf sinf
+    mtau (ms) htau (ms) stau (ms)
     mexp hexp sexp
+    q10
 }
 
 
 STATE {
-    m h s r
+    m h s
 }
 
 
 BREAKPOINT {
     SOLVE states METHOD cnexp
-    gnat = gnabar*m*m*m*h*s*r
+    gnat = gnabar*m*m*m*h*s
     ina = gnat*(v - ena)
 }
 
@@ -67,7 +68,6 @@ INITIAL{
     m = minf
     h = hinf
     s = sinf
-    r = rinf
 }
 
 DERIVATIVE states{
@@ -75,41 +75,30 @@ DERIVATIVE states{
     m' = (minf-m)/mtau
     h' = (hinf-h)/htau
     s' = (sinf-s)/stau
-    r' = (rinf-r)/rtau
-
-    : printf("v: %g,  s: %g,  r: %g, rinf: %g, rtau: %g\n", v, h, r, rinf, rtau)
-
 }
 
 PROCEDURE rates(v (mV)) {   :Computes rate and other constants at current v.
                             :Call once from HOC to initialize inf at resting v.
 
-    LOCAL  alpha, beta, sum, q10
+    LOCAL  alpha, beta, sum
     q10 = 3^((celsiusT - 6.3)/10)
 
-  TABLE minf, mtau, hinf, htau, sinf, stau, rinf, rtau
-  FROM -100 TO 100 WITH 200
 
     :"m" sodium activation system
-    minf = 1/(1+exp(-(v+16.8)/6.1))
-    mtau = 0.1 + 0.35*(1/(1+exp((v+10.3)/8.7)))
+    minf = 1/(1+exp(-(v+21.2)/4.9))
+    mtau = 0.15 : 0.05*(1/(1+exp((v+5)/9.7)))
 
     :"h" sodium fast inactivation system
-    hinf = 1/(1+exp((v+47.3)/6.1))
-    htau = 0.2 + 1/(1.8*(exp(v/20.3)))
+    hinf = 1/(1+exp((v+39.7)/7.7))
+    htau = 11.8*exp(-0.5*((v+57.4)/28.8)^2)
 
     :"s" sodium slow inactivation system
-    sinf = 1/(1+exp((v+53.5)/7.6))
-    stau = 2070 + (7.5*exp(((v+68.7)/19.6)^2))
-
-    :"s" sodium slow inactivation system
-    rinf =  1/(1+exp((v+68.3)/7.5))
-    rtau = 3449 + (7.5*exp(((v+68.7)/19.6)^2))
+    sinf = 1/(1+exp((v+46.1)/5.4))
+    stau = 1000 + (106.7*exp(-0.5*((v+52.7)/18.3)^2))
 
     mtau=mtau*(1/q10)
     htau=htau*(1/q10)
     stau=stau*(1/q10)
-    rtau=rtau*(1/q10)
 }
 
 UNITSON

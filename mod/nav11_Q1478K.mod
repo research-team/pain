@@ -15,10 +15,10 @@ UNITS {
 
 
 NEURON {
-    SUFFIX nav11_L1670W
+    SUFFIX nav11_Q1478K
     USEION na READ ena WRITE ina
     RANGE gnabar, ina
-    RANGE minf, mtau, hinf, htau, sinf, rinf, rtau, stau, m, h, s, r
+    RANGE minf, mtau, hinf, htau, sinf, stau, m, h, s, s2
 }
 
 
@@ -45,6 +45,7 @@ ASSIGNED {
     minf hinf sinf rinf
     mtau (ms) htau (ms) stau (ms) rtau (ms)
     mexp hexp sexp
+    s2
 }
 
 
@@ -68,6 +69,7 @@ INITIAL{
     h = hinf
     s = sinf
     r = rinf
+
 }
 
 DERIVATIVE states{
@@ -77,37 +79,40 @@ DERIVATIVE states{
     s' = (sinf-s)/stau
     r' = (rinf-r)/rtau
 
-    : printf("v: %g,  s: %g,  r: %g, rinf: %g, rtau: %g\n", v, h, r, rinf, rtau)
-
+    s2 = sinf-s
 }
 
 PROCEDURE rates(v (mV)) {   :Computes rate and other constants at current v.
                             :Call once from HOC to initialize inf at resting v.
 
     LOCAL  alpha, beta, sum, q10
-    q10 = 3^((celsiusT - 6.3)/10)
+    q10 = 3^((celsiusT - 30)/10)
 
   TABLE minf, mtau, hinf, htau, sinf, stau, rinf, rtau
   FROM -100 TO 100 WITH 200
 
     :"m" sodium activation system
-    minf = 1/(1+exp(-(v+16.8)/6.1))
-    mtau = 0.1 + 0.35*(1/(1+exp((v+10.3)/8.7)))
+    minf = 1/(1+exp(-(v+25)/9.1))
+    mtau = 0.1 :+ 0.035*(1/(1+exp((v+12)/10.7)))
 
     :"h" sodium fast inactivation system
-    hinf = 1/(1+exp((v+47.3)/6.1))
-    htau = 0.2 + 1/(1.8*(exp(v/20.3)))
+    hinf = 1/(1+exp((v+60)/7.4))
+    if (v > -70){
+      htau = 17.6 * (1/exp(0.3*((v+65)/7.6)^2))
+    }else{
+      htau = 17.6 * (1/exp(0.1*((v+65)/7.75)^2))
+    }
 
     :"s" sodium slow inactivation system
-    sinf = 1/(1+exp((v+53.5)/7.6))
-    stau = 2070 + (7.5*exp(((v+68.7)/19.6)^2))
+    sinf = 0.06 + 1/(1+exp((v+75.8)/6.2))
+    stau = 1258*exp(110*((v+11)/1649)^2)
 
-    :"s" sodium slow inactivation system
-    rinf =  1/(1+exp((v+68.3)/7.5))
-    rtau = 3449 + (7.5*exp(((v+68.7)/19.6)^2))
+    :"r" recovery sodium slow inactivation system
+    rinf = 1/(1+exp((v+60.4)/8.1))
+    rtau = 3425*exp(3.75*((v+12)/548.65)^2)
 
     mtau=mtau*(1/q10)
-    htau=htau*(1/q10)
+		htau=htau*(1/q10)
     stau=stau*(1/q10)
     rtau=rtau*(1/q10)
 }
