@@ -1,7 +1,7 @@
 from neuron import h, gui
 import math
 import random
-# h.load_mechanisms("./mod")
+#neuron.load_mechanisms("./mod")
 
 class cfiber(object):
     '''
@@ -25,13 +25,14 @@ class cfiber(object):
     recs: list
         list of receptors mechanisms (NEURON staff)
     '''
-    def __init__(self, L, d, zpozition, x_application, fast_diff, numofmodel):
+    def __init__(self, L, d, zpozition, x_application, fast_diff, numofmodel, temperature = 37):
         self.coordinates = dict()
         self.distances = dict()
         self.diffusions = dict()
         self.fast_diff = fast_diff
         self.diffs = []
         self.recs = []
+        self.synlistinh = []
         self.L = L
         self.diam = d
         self.zpozition = zpozition
@@ -43,17 +44,25 @@ class cfiber(object):
             self.num = 120
         self.create_sections()
         self.build_topology()
-        self.build_subsets()
+        # self.build_subsets()
         self.define_geometry()
         self.position()
         self.distance()
-        self.define_biophysics()
+        self.define_biophysics(temperature)
+        self.synapses()
+
     def create_sections(self):
         '''
         Creates sections (compartments)
         '''
         self.branch = h.Section(name='branch', cell=self)
         self.stimsec = [h.Section(name='stimsec[%d]' % i) for i in range(self.num)]
+        self.all_secs = h.SectionList()
+        # for sec in self.branch:
+        self.all_secs.append(sec=self.branch)
+        for sec in self.stimsec:
+            self.all_secs.append(sec=sec)
+
     def build_topology(self):
         '''
         Connects sections
@@ -71,7 +80,6 @@ class cfiber(object):
         else:
             for i in range(1, len(self.stimsec)):
                 self.stimsec[i].connect(self.stimsec[i-1])
-
     def define_geometry(self):
         '''
         Adds length and diameter to sections
@@ -79,12 +87,11 @@ class cfiber(object):
         for sec in self.stimsec:
             sec.L = self.L# microns
             sec.diam = self.diam # microns
-            sec.nseg = 4
+            sec.nseg = 3
         self.branch.L = self.L
         self.branch.diam = self.diam
-        self.branch.nseg = 3
+        self.branch.nseg = 1
         h.define_shape() # Translate into 3D points.
-
     def position(self):
         '''
         Adds 3D position
@@ -115,14 +122,13 @@ class cfiber(object):
                 self.coordinates.update({self.stimsec[i]: xyz})
         else:
             i = 0
-            for sec in self.all:
+            for sec in self.all_secs:
               h.pt3dclear()
               h.pt3dadd(self.L*i, 0, self.zpozition, self.diam)
               h.pt3dadd(self.L*(i+1), 0, self.zpozition, self.diam)
               xyz = dict(x=self.L*(i+1), y=0, z=0)
               self.coordinates.update({sec: xyz})
               i+=1
-
     def distance(self):
         '''
         Adds distances from application for every compartment
@@ -130,74 +136,83 @@ class cfiber(object):
         #self.distances.clear()
         if self.numofmodel == 11 or self.numofmodel == 12:
             self.x_application = -400
-            for compartment in self.all:
+            for compartment in self.all_secs:
                 distance = math.sqrt((30050-self.coordinates.get(compartment).get('x'))**2 + (self.x_application-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
                 self.distances.update({compartment: distance})
         else:
-            for compartment in self.all:
-                distance = math.sqrt((self.x_application-self.coordinates.get(compartment).get('x'))**2 + (50-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
+            for compartment in self.all_secs:
+                distance = math.sqrt((self.x_application-self.coordinates.get(compartment).get('x'))**2 + (10-self.coordinates.get(compartment).get('y'))**2 + (0.01-self.coordinates.get(compartment).get('z'))**2)
                 self.distances.update({compartment: distance})
 
-    def define_biophysics(self):
+    def define_biophysics(self, temperature):
         '''
         Adds channels and their parameters
         '''
-        for sec in self.all: # 'all' defined in build_subsets
+        for sec in self.all_secs: # 'all' defined in build_subsets
             sec.Ra = 35  # Axial resistance in Ohm * cm
             sec.cm = 1      # Membrane capacitance in micro Farads / cm^2
             sec.insert('nav1p8')
+            sec.insert('nav1p9')
             sec.insert('extrapump')
             sec.insert('koi')
             sec.insert('naoi')
             sec.insert('nakpump')
             sec.insert('nattxs')
-            sec.insert('nav1p9')
             sec.insert('kdr')
-            sec.insert('kv1')
-            sec.insert('kv2')
-            sec.insert('kv4')
+            sec.insert('kad')
+            sec.insert('kap')
             sec.insert('leak')
-            # sec.insert('nav11_L263V')
             sec.insert('Nav1_3')
             sec.insert('extracellular')
             sec.insert('iKCa')
-            sec.insert('iCaL')
+            sec.insert('iCaAN')
             sec.insert('CaIntraCellDyn')
             if self.numofmodel == 8 or self.numofmodel >= 11:
-                sec.gbar_nav1p8= 0.22
-                sec.gbar_nav1p9 = 0.0004
+                sec.gbar_nav1p8 = 0.15
+                sec.gbar_nav1p9 = 0.00003
             elif self.numofmodel == 7:
                 sec.gbar_nav1p8 = 0.1
+                sec.gbar_nav1p9 = 0.0001
             else:
                 sec.gbar_nav1p8 = 0
+                sec.gbar_nav1p9 = 0
             sec.gbar_kdr = 0.01
-            sec.gkbar_kv1 = 0.002
-            sec.gkbar_kv2 = 0.01
-            sec.gkbar_kv4 = 0.02
+            sec.gbar_kad = 0.006
+            sec.gbar_kap = 0.006
             if self.numofmodel == 6:
                 sec.gbar_nattxs = 0.2
             else:
-                sec.gbar_nattxs = 0.2
-            sec.gbar_Nav1_3 = 0.0
-            sec.gbar_nav1p9 = 0.0#001
+                sec.gbar_nattxs = 0.1
+            sec.gbar_Nav1_3 = 0.0#2
             sec.smalla_nakpump = -0.0047891
             sec.theta_naoi = 0.029
             sec.theta_koi = 0.029
-            sec.celsiusT_nattxs = 37
-            sec.celsiusT_nav1p8= 37
-            sec.celsiusT_nakpump = 37
-            sec.gbar_iKCa = 0.0001
-            # sec.gnabar_nav11_L263V = 0.5
+            sec.celsiusT_nattxs = temperature
+            sec.celsiusT_nav1p8= temperature
+            sec.celsiusT_nav1p9= temperature
+            sec.celsiusT_nakpump = temperature
+            sec.celsiusT_kad = temperature
+            sec.celsiusT_kap = temperature
+            sec.celsiusT_kdr = temperature
+            sec.celsiusT_iKCa = temperature
+            sec.gbar_iKCa = 0.001
+            # # sec.gnabar_nav11_L263V = 0.5
             sec.depth_CaIntraCellDyn = 0.1
             sec.cai_tau_CaIntraCellDyn = 2.0
             sec.cai_inf_CaIntraCellDyn = 50.0e-6
-            sec.pcabar_iCaL = 0.00001
+            sec.gbar_iCaAN = 0.0035
+            sec.celsiusT_iCaAN = temperature
+
+
         for sec in self.stimsec:
             if self.numofmodel == 13 or self.numofmodel == 14:
-                self.add_5HTreceptors(sec, 10, 1)
+                self.add_5HTreceptors(sec, random.randint(10, 20), 10)
             else:
-                self.add_P2Xreceptors(sec, 10, 50)
-    def add_P2Xreceptors(self, compartment, time, g):
+                self.add_P2Xreceptors(sec, 10, 5, temperature)
+                self.add_5HTreceptors(sec, 10, 10)
+
+
+    def add_P2Xreceptors(self, compartment, time, g, temperature):
         '''
         Adds P2X3 receptors
         Parameters
@@ -212,7 +227,7 @@ class cfiber(object):
             receptor conductance
         '''
         if self.fast_diff:
-            diff = h.AtP_42(compartment(0.1))
+            diff = h.AtP_42(compartment(0.5))
             diff.h = self.distances.get(compartment)
             diff.tx1 = time
             diff.Deff = 0.8
@@ -225,15 +240,16 @@ class cfiber(object):
             elif self.numofmodel == 3:
                 diff.k = 0.6
             else:
-                diff.k = 0.01
+                diff.k = 0.001
         else:
             diff = h.AtP_slow(compartment(0.5))
             diff.h = self.distances.get(compartment)
             diff.tx1 = time + 0 + (diff.h/1250)*1000
             diff.c0cleft = 100
         self.diffusions.update({diff: compartment})
-        rec = h.p2x3(compartment(0.1))
+        rec = h.p2x3(compartment(0.5))
         rec.gmax = g
+        rec.celsiusT = temperature
         rec.Ev = 5
         if self.numofmodel == 4 or self.numofmodel == 5:
             rec2 = h.p2x2(compartment(0.5))
@@ -249,6 +265,7 @@ class cfiber(object):
         h.setpointer(diff._ref_atp, 'patp', rec)
         self.recs.append(rec)
         self.diffs.append(diff)
+
     def add_5HTreceptors(self, compartment, time, g):
         '''
         Adds 5HT receptors
@@ -264,7 +281,7 @@ class cfiber(object):
             receptor conductance
         '''
         if self.fast_diff:
-            diff = h.diff_5HT(compartment(0.25))
+            diff = h.diff_5HT(compartment(0.5))
             diff.h = self.distances.get(compartment)
             diff.tx1 = time
             if self.numofmodel == 14:
@@ -283,14 +300,15 @@ class cfiber(object):
         h.setpointer(diff._ref_serotonin, 'serotonin', rec)
         self.diffs.append(diff)
         self.recs.append(rec)
+
     def build_subsets(self):
         '''
         adds sections in NEURON SectionList
         '''
         self.all = h.SectionList()
-        for sec in self.stimsec:
+        for sec in h.allsec():
           self.all.append(sec=sec)
-        self.all.append(sec=self.branch)
+
     def connect2target(self, target):
         '''
         Adds presynapses
@@ -306,3 +324,10 @@ class cfiber(object):
         nc = h.NetCon(self.branch(1)._ref_v, target, sec = self.branch)
         nc.threshold = 10
         return nc
+    def synapses(self):
+        '''
+        Adds synapses
+        '''
+        for i in range(10):
+            s = h.GABAa_DynSyn(self.branch(0.5)) # Inhibitory
+            self.synlistinh.append(s)
