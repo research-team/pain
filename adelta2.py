@@ -21,13 +21,15 @@ class adelta2(object):
     self.diffs = []
     self.recs = []
     self.axons = []
+    self.synlistinh = []
     self.axon1 = axon(17)
     self.axon2 = axon(10)
     self.axon3 = axon(10)
+    self.synapses()
     # self.axon4 = axon(10)
-    self.axons.append(self.axon1)
     self.axons.append(self.axon2)
     self.axons.append(self.axon3)
+    self.axons.append(self.axon1)
     self.x_application = 5600
     self.fast_diff = diff_type
     self.build_subsets()
@@ -38,6 +40,13 @@ class adelta2(object):
       adds sections in NEURON SectionList
       '''
       self.soma = h.Section(name='soma', cell=self)
+      self.all_secs = h.SectionList()
+      # for sec in self.branch:
+      for axon in self.axons:
+          for sec in axon.all_secs:
+              self.all_secs.append(sec=sec)
+      self.all_secs.append(sec=self.soma)
+
       # self.all = h.SectionList()
       # for sec in h.allsec():
       #   self.all.append(sec=sec)
@@ -85,44 +94,44 @@ class adelta2(object):
       self.soma.Ra = 100
       self.soma.nseg = 10
       self.soma.L = self.soma.diam = 20
-      self.soma.insert('nav1p8')
-      self.soma.insert('nattxs')
-      self.soma.insert('nav11_L263V')
-      self.soma.insert('nav1p6')
-      self.soma.insert('pas')
-      self.soma.insert('kv1')
-      self.soma.insert('kv3')
-      self.soma.insert('kv4')
-
-      self.soma.gbar_nav1p8 = 0.0005
-      self.soma.gnabar_nav1p6 = 0.1#random.uniform(0.35, 0.5)
-      self.soma.gnabar_nav11_L263V = 0.1#random.uniform(0.35, 0.5)
-
-      self.soma.gkbar_kv1 = 0.002#random.uniform(0.02, 0.06)
-      self.soma.gkbar_kv3 = 0.002#random.uniform(0.02, 0.06)
-      self.soma.gkbar_kv4 = 0.0001
-      self.soma.gbar_nattxs = 0.05# random.uniform(0.3, 0.5)
-
-      self.soma.g_pas = 0.002
-      self.soma.e_pas = -60
+      # self.soma.insert('nav1p8')
+      # self.soma.insert('nattxs')
+      # self.soma.insert('nav11_L263V')
+      # self.soma.insert('nav1p6')
+      # self.soma.insert('pas')
+      # self.soma.insert('kv1')
+      # self.soma.insert('kv3')
+      # self.soma.insert('kv4')
+      #
+      # self.soma.gbar_nav1p8 = 0.0005
+      # self.soma.gnabar_nav1p6 = 0.1#random.uniform(0.35, 0.5)
+      # self.soma.gnabar_nav11_L263V = 0.1#random.uniform(0.35, 0.5)
+      #
+      # self.soma.gkbar_kv1 = 0.002#random.uniform(0.02, 0.06)
+      # self.soma.gkbar_kv3 = 0.002#random.uniform(0.02, 0.06)
+      # self.soma.gkbar_kv4 = 0.0001
+      # self.soma.gbar_nattxs = 0.05# random.uniform(0.3, 0.5)
+      #
+      # self.soma.g_pas = 0.002
+      # self.soma.e_pas = -60
       # self.soma.ena = 55
       # self.soma.ek = -90
-
-      self.soma.celsiusT_nattxs = 37
-      self.soma.celsiusT_nav1p8 = 37
+      #
+      # self.soma.celsiusT_nattxs = 37
+      # self.soma.celsiusT_nav1p8 = 37
 
       print(self.coordinates)
 
       # self.add_5HTreceptors(sec, 10, 1)
       # for sec in self.axon1.node:
-          # self.add_5HTreceptors(sec, 10, 15)
+      #     self.add_5HTreceptors(sec, 10, 15)
           # self.add_P2Xreceptors(sec, 10, 15)
       for sec in self.axon2.node:
-          # self.add_5HTreceptors(sec, 10, 15)
-          self.add_P2Xreceptors(sec, 10, 15)
+          self.add_5HTreceptors(sec, random.randint(10,15), 15)
+          # self.add_P2Xreceptors(sec, 10, 15)
       for sec in self.axon3.node:
-          # self.add_5HTreceptors(sec, 10, 15)
-          self.add_P2Xreceptors(sec, 10, 15)
+          self.add_5HTreceptors(sec, random.randint(10,15), 15)
+          # self.add_P2Xreceptors(sec, 10, 15)
 
 
   def add_P2Xreceptors(self, compartment, time, g):
@@ -203,11 +212,11 @@ class adelta2(object):
             print(compartment)
             print(diff.h)
             diff.tx1 = time + i*self.dt
-            diff.a = 0.25
+            diff.a = 10
             diff.Deff = 0.4
             diff.c0cleft = 2
             rec = h.r5ht3a(compartment(0.5))
-            rec.gmax = g
+            rec.gmax = random.gauss(g, g / 10)
             h.setpointer(diff._ref_serotonin, 'serotonin', rec)
             self.recs.append(rec)
             self.diffs.append(diff)
@@ -216,11 +225,20 @@ class adelta2(object):
           diff.h = self.distance(compartment, x[0], y[0], z[0])
           diff.tx1 = time + 0 + (diff.h/50)*10#00
           diff.c0cleft = 3
+          diff.a = 10
           rec = h.r5ht3a(compartment(0.5))
-          rec.gmax = g
+          rec.gmax = random.gauss(g, g / 10)
           h.setpointer(diff._ref_serotonin, 'serotonin', rec)
           self.diffs.append(diff)
           self.recs.append(rec)
+
+  def synapses(self):
+    '''
+    Adds synapses
+    '''
+    for i in range(10):
+        s = h.GABAa_DynSyn(self.axon2.node[0](0.5)) # Inhibitory
+        self.synlistinh.append(s)
 
   def connect2target(self, target):
       '''

@@ -30,14 +30,14 @@ class WDR_model(object):
     self.diffs = []
     self.recs = []
     self.topol()
-    self.subsets()
+    # self.subsets()
     self.geom()
     # self.geom_nseg()
     self.biophys()
     self.synlistinh = []
     self.synlistex = []
     self.synlistees = []
-    # self.synapses()
+    self.synapses()
     self.x = self.y = self.z = 0.
 
     def __del__(self):
@@ -57,6 +57,13 @@ class WDR_model(object):
       sec.connect(self.soma(0))
     self.hillock.connect(self.soma(1))
     self.axon.connect(self.hillock(1))
+    self.all_secs = h.SectionList()
+    # for sec in self.branch:
+    self.all_secs.append(sec=self.soma)
+    self.all_secs.append(sec=self.axon)
+    self.all_secs.append(sec=self.hillock)
+    for sec in self.dend:
+        self.all_secs.append(sec=sec)
 
   def subsets(self):
     '''
@@ -109,7 +116,7 @@ class WDR_model(object):
     self.soma.gnabar_fastchannels = 0.08
     self.soma.gkbar_fastchannels = 0.02
     self.soma.gl_fastchannels = 0.000042
-    self.soma.el_fastchannels = -65
+    self.soma.el_fastchannels = -60
     self.soma.insert('iKCa')
     self.soma.insert('iCaL')
     self.soma.insert('iNaP')
@@ -135,7 +142,7 @@ class WDR_model(object):
       sec.insert('iCaL')
       sec.insert('CaIntraCellDyn')
       sec.insert('iCaAN')
-      sec.gbar_iKCa = 0.001
+      sec.gbar_iKCa = 0.0001
       sec.depth_CaIntraCellDyn = 0.1
       sec.cai_tau_CaIntraCellDyn = 2.0
       sec.cai_inf_CaIntraCellDyn = 50.0e-6

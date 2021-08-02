@@ -40,7 +40,7 @@ class interneuron(object):
     self.synlistinh = []
     self.synlistex = []
     self.synlistees = []
-    # self.synapses()
+    self.synapses()
     self.x = self.y = self.z = 0.
 
     def __del__(self):
@@ -57,7 +57,13 @@ class interneuron(object):
     self.dend = [h.Section(name='dend[%d]' % i) for i in range(random.randint(5,10))]
     for sec in self.dend:
       sec.connect(self.soma(0.5))
-    # self.axon.connect(self.soma(1))
+    self.axon.connect(self.soma(1))
+    self.all_secs = h.SectionList()
+    # for sec in self.branch:
+    self.all_secs.append(sec=self.soma)
+    self.all_secs.append(sec=self.axon)
+    for sec in self.dend:
+        self.all_secs.append(sec=sec)
 
   def subsets(self):
     '''
@@ -73,8 +79,8 @@ class interneuron(object):
     Adds length and diameter to sections
     '''
     self.soma.L = self.soma.diam = 10#random.randint(5, 15) # microns
-    # self.axon.L = 150 # microns
-    # self.axon.diam = 1 # microns
+    self.axon.L = 150 # microns
+    self.axon.diam = 1 # microns
     for sec in self.dend:
       sec.L = 200 # microns
       sec.diam = 1#random.gauss(1, 0.1) # microns
@@ -115,14 +121,18 @@ class interneuron(object):
       else:
         # sec.insert('pas')
         sec.insert('fastchannels')
-        sec.gnabar_fastchannels  = 0.17
+        sec.gnabar_fastchannels  = 0.1
         sec.gkbar_fastchannels = 0.04
-        sec.gl_fastchannels = 0.0005
+        sec.gl_fastchannels = 0.001
         # sec.g_pas = 0.0002
         # sec.e_pas = -60
 
-    # self.axon.Ra = 50
-    # self.axon.insert('hh')
+    self.axon.Ra = 50
+    self.axon.insert('fastchannels')
+    self.axon.gnabar_fastchannels = 0.025
+    self.axon.gkbar_fastchannels = 0.02
+    self.axon.gl_fastchannels = 0.0001
+    self.axon.el_fastchannels = -65
 
   def add_5HTreceptors(self, compartment, time, g):
     '''
@@ -182,24 +192,7 @@ class interneuron(object):
     Adds synapses
     '''
     for i in range(10):
-        for sec in self.dend:
-            s = h.ExpSyn(sec(0.5)) # Excitatory
-            s.tau = 0.1
-            s.e = 50
-            self.synlistex.append(s)
-            s = h.ExpSyn(sec(0.5)) # Inhibitory
-            s.tau = 0.5
-            s.e = -80
-            self.synlistinh.append(s)
-
-        s = h.ExpSyn(self.soma(0.1)) # Excitatory
-        s.tau = 0.35
-        s.e = 50
-        self.synlistex.append(s)
-        s = h.Exp2Syn(self.soma(0.5)) # Inhibitory
-        s.tau1 = 0.5
-        s.tau2 = 3.5
-        s.e = -80
+        s = h.GABAa_DynSyn(self.soma(0.5)) # Inhibitory
         self.synlistinh.append(s)
             #
 

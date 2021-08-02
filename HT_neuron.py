@@ -30,14 +30,14 @@ class HT_model(object):
     self.diffs = []
     self.recs = []
     self.topol()
-    self.subsets()
+    # self.subsets()
     self.geom()
     # self.geom_nseg()
     self.biophys()
     self.synlistinh = []
     self.synlistex = []
     self.synlistees = []
-    # self.synapses()
+    self.synapses()
     self.x = self.y = self.z = 0.
 
     def __del__(self):
@@ -57,6 +57,13 @@ class HT_model(object):
       sec.connect(self.soma(0))
     self.hillock.connect(self.soma(1))
     self.axon.connect(self.hillock(1))
+    self.all_secs = h.SectionList()
+    # for sec in self.branch:
+    self.all_secs.append(sec=self.soma)
+    self.all_secs.append(sec=self.axon)
+    self.all_secs.append(sec=self.hillock)
+    for sec in self.dend:
+        self.all_secs.append(sec=sec)
 
   def subsets(self):
     '''
@@ -108,11 +115,12 @@ class HT_model(object):
     self.soma.insert('fastchannels')
     self.soma.gnabar_fastchannels = 0.08
     self.soma.gkbar_fastchannels = 0.02
-    self.soma.gl_fastchannels = 0.000042
-    self.soma.el_fastchannels = -65
+    self.soma.gl_fastchannels = 0.0004
+    self.soma.el_fastchannels = -60
     self.soma.insert('iKCa')
     self.soma.insert('iCaL')
     self.soma.insert('Kv7M')
+    self.soma.gbar_Kv7M = 50
     self.soma.cm = 0.8
     self.soma.Ra = 220
 
@@ -123,20 +131,20 @@ class HT_model(object):
     self.soma.depth_CaIntraCellDyn = 0.1
     self.soma.cai_tau_CaIntraCellDyn = 1.0
     self.soma.cai_inf_CaIntraCellDyn = 50.0e-6
-    self.soma.pcabar_iCaL = 0.0001
+    self.soma.pcabar_iCaL = 0.00001
     # self.soma.gnabar_iNaP = 0.0001
 
     self.soma.insert('extracellular') #adds extracellular mechanism for recording extracellular potential
 
     for sec in self.dend:
       sec.insert('pas')
-      sec.g_pas = 0.000042
+      sec.g_pas = 0.0005
       sec.e_pas = -65
       sec.insert('iKCa')
       sec.insert('iCaL')
       sec.insert('CaIntraCellDyn')
       # sec.insert('iCaAN')
-      sec.gbar_iKCa = 0.001
+      sec.gbar_iKCa = 0.002
       sec.depth_CaIntraCellDyn = 0.1
       sec.cai_tau_CaIntraCellDyn = 2.0
       sec.cai_inf_CaIntraCellDyn = 50.0e-6
@@ -146,7 +154,7 @@ class HT_model(object):
       # sec.gbar_iCaAN =  0.00007
 
     self.hillock.insert('fastchannels')
-    self.hillock.gnabar_fastchannels = 3.45
+    self.hillock.gnabar_fastchannels = 2.45
     self.hillock.gkbar_fastchannels = 0.076
     self.hillock.gl_fastchannels = 0.000042
     self.hillock.el_fastchannels = -65
@@ -217,25 +225,11 @@ class HT_model(object):
     '''
     Adds synapses
     '''
-    for i in range(10):
-        for sec in self.dend:
-            s = h.ExpSyn(sec(0.5)) # Excitatory
-            s.tau = 0.1
-            s.e = 50
-            self.synlistex.append(s)
-            s = h.ExpSyn(sec(0.5)) # Inhibitory
-            s.tau = 0.5
-            s.e = -80
-            self.synlistinh.append(s)
-
-        s = h.ExpSyn(self.soma(0.1)) # Excitatory
-        s.tau = 0.35
-        s.e = 50
-        self.synlistex.append(s)
-        s = h.Exp2Syn(self.soma(0.5)) # Inhibitory
-        s.tau1 = 0.5
-        s.tau2 = 3.5
-        s.e = -80
+    for i in range(20):
+        s = h.GABAa_DynSyn(self.soma(0.5)) # Inhibitory
+        # s.tau1 = 0.5
+        # s.tau2 = 3.5
+        # s.e = -80
         self.synlistinh.append(s)
             #
 

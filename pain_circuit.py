@@ -102,12 +102,11 @@ def simulate(cells, tstop=500, vinit=-55):
 def spike_time_rec(section):
     vec = h.Vector()
     netcon = h.NetCon(section(0.5)._ref_v, None, sec=section)
+    netcon.threshold = -10
     netcon.record(vec)
     return vec
 
-
 def add_gaba_receptors(synapses, pre, g):
-
     for syn in synapses:
         nc = h.NetCon(pre(1)._ref_v, syn, sec = pre)
         nc.threshold = 0
@@ -127,6 +126,26 @@ def add_5HT_receptors(compartment, dist, g):
         h.setpointer(diff._ref_serotonin, 'serotonin', rec)
         diffs.append(diff)
         recs.append(rec)
+
+
+def pool_recording(pool):
+    v_vecs = []
+    spikes_vec = []
+    for cell in pool:
+        v_vec, t_vec = set_recording_vectors(list(cell.all_secs)[0])
+        print(list(cell.all_secs)[0])
+        spike_vec = spike_time_rec(list(cell.all_secs)[0])
+        spikes_vec.append(spike_vec)
+        v_vecs.append(v_vec)
+    return v_vecs, spikes_vec, t_vec
+
+
+def spike_time_plot(pool_spikes, ymax, color):
+    for spike in pool_spikes:
+        print(list(spike))
+        for x in list(spike):
+            pyplot.vlines(x, ymax-1, ymax, colors=color)
+
 
 def add_glu_receptors(compartment, pre, g1, g2):
     '''
@@ -154,7 +173,7 @@ def add_glu_receptors(compartment, pre, g1, g2):
         recs.append(rec)
         rec2 = h.nmda_rec(sec(0.5))
         rec2.gmax=random.gauss(g2, g2 / 10)
-        print(g2)
+        # print(g2)
         h.setpointer(diff._ref_glu, 'glu_m', rec2)        # vc = h.IClamp(0.5, sec=cell.axon1.node[5])
         recs.append(rec2)
 
@@ -242,50 +261,28 @@ if __name__ == '__main__':
 
     # for sec in h.allsec():
     #     h.psection(sec=sec) #show parameters of each section
-    v_vecs = []
-    v_vecs_cf = []
-    v_vecs_in2 = []
-    v_vecs_in1 = []
-    v_vecs_lcn = []
-    v_vecs_wdr = []
-    v_vecs_ht = []
-    wdr_spikes = []
-
-    for i in range(0, len(c_fibers)):
-        v_vec, t_vec = set_recording_vectors(a_deltas[i].axon1.node[5])
-        v_vec_cf, t_vec = set_recording_vectors(c_fibers[i].branch)
-        v_vecs.append(v_vec)
-        v_vecs_cf.append(v_vec_cf)
-        v_vec_in2, t_vec = set_recording_vectors(IN2s[i].soma)
-        v_vec_in1, t_vec = set_recording_vectors(IN1s[i].soma)
-
-        v_vec_lcn, t_vec = set_recording_vectors(LCNs[i].soma)
-        v_vec_wdr, t_vec = set_recording_vectors(WDRs[i].soma)
-        wdr_spike_vec = spike_time_rec(WDRs[i].soma)
-        wdr_spikes.append(wdr_spike_vec)
-
-        v_vec_ht, t_vec = set_recording_vectors(HTs[i].soma)
-
-        v_vecs_in2.append(v_vec_in2)
-        v_vecs_in1.append(v_vec_in1)
-        v_vecs_lcn.append(v_vec_lcn)
-        v_vecs_wdr.append(v_vec_wdr)
-        v_vecs_ht.append(v_vec_ht)
-
+    v_vecs, spikes_vec, t_vec = pool_recording(a_deltas)
+    v_vecs_cf, spikes_vecs_cf, t_vec = pool_recording(c_fibers)
+    v_vecs_in2, spikes_vecs_in2, t_vec = pool_recording(IN2s)
+    v_vecs_in1, spikes_vecs_in1, t_vec = pool_recording(IN1s)
+    v_vecs_lcn, spikes_vecs_lcn, t_vec = pool_recording(LCNs)
+    v_vecs_wdr, spikes_vecs_wdr, t_vec = pool_recording(WDRs)
+    v_vecs_ht, spikes_vecs_ht, t_vec = pool_recording(HTs)
 
     simulate(c_fibers)
-    show_output(v_vecs, t_vec, "a_delta")
-    show_output(v_vecs_cf, t_vec, "c_fiber")
-    show_output(v_vecs_in2, t_vec, "IN2")
+    # show_output(v_vecs, t_vec, "a_delta")
+    # show_output(v_vecs_cf, t_vec, "c_fiber")
+    # show_output(v_vecs_in2, t_vec, "IN2")
+    #
+    # show_output(v_vecs_lcn, t_vec, "LCN")
+    # show_output(v_vecs_wdr, t_vec, "WDR")
+    # show_output(v_vecs_ht, t_vec, "HT")
+    # show_output(v_vecs_in1, t_vec, "IN1")
 
-    show_output(v_vecs_lcn, t_vec, "LCN")
-    show_output(v_vecs_wdr, t_vec, "WDR")
-    show_output(v_vecs_ht, t_vec, "HT")
-    show_output(v_vecs_in1, t_vec, "IN1")
+    spike_time_plot(spikes_vec, 1, 'k')
+    spike_time_plot(spikes_vecs_cf, 2, 'c')
+    spike_time_plot(spikes_vecs_wdr, 3, 'm')
+    spike_time_plot(spikes_vecs_ht, 4, 'r')
 
-    for spike in wdr_spikes:
-        print(list(spike))
 
     pyplot.show()
-
-        # pyplot.show()

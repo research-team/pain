@@ -44,7 +44,7 @@ class axon(object):
     self.Rpn2=(self.rhoa*0.01)/(PI*((((self.paraD2/2)+space_p2)**2)-((self.paraD2/2)**2)))
     self.Rpx=(self.rhoa*0.01)/(PI*((((self.axonD/2)+space_i)**2)-((self.axonD/2)**2)))
     self.topol()
-    self.subsets()
+    # self.subsets()
     self.geom()
     self.biophys()
 
@@ -60,6 +60,17 @@ class axon(object):
     self.FLUT = [h.Section(name='FLUT[%d]' % i, cell=self) for i in range(self.paranodes2)]
     self.STIN = [h.Section(name='STIN[%d]' % i, cell=self) for i in range(self.axoninter)]
     self.node = [h.Section(name='node[%d]' % i, cell=self) for i in range(self.axonnodes)]
+
+    self.all_secs = h.SectionList()
+    # for sec in self.branch:
+    for sec in self.node:
+        self.all_secs.append(sec=sec)
+    for sec in self.MYSA:
+        self.all_secs.append(sec=sec)
+    for sec in self.FLUT:
+        self.all_secs.append(sec=sec)
+    for sec in self.STIN:
+        self.all_secs.append(sec=sec)
 
     for i in range(self.number):
       self.MYSA[2*i].connect(self.node[i](1))
@@ -81,8 +92,8 @@ class axon(object):
     adds sections in NEURON SectionList
     '''
     self.all = h.SectionList()
-    # for sec in h.allsec():
-    #   self.all.append(sec=sec)
+    for sec in h.allsec():
+      self.all.append(sec=sec)
 
   def geom(self):
     for sec in self.node:
@@ -113,7 +124,7 @@ class axon(object):
     Adds channels and their parameters
     '''
     for sec in self.node:
-      sec.Ra = 70#self.rhoa/30000
+      sec.Ra = self.rhoa/20000
       sec.cm = 2
       sec.insert('extracellular')
       sec.xraxial[0] = self.Rpn0
@@ -131,8 +142,8 @@ class axon(object):
       # sec.insert('kdr')
       # sec.insert('leak')
       sec.insert('Nav1_3')
-      sec.insert('nav11_L263V')
-      # sec.insert('nav1p1')
+      # sec.insert('nav11_L263V')
+      sec.insert('nav11_WT_Q1478K')
 
 
       sec.insert('nav1p6')
@@ -140,31 +151,31 @@ class axon(object):
       sec.insert('kv1')
       sec.insert('kv3')
       sec.insert('kv4')
-
+      sec.insert('Kv7M')
       sec.insert('iKCa')
-      sec.insert('iCaL')
+      sec.insert('iCaAN')
       sec.insert('CaIntraCellDyn')
-      sec.gbar_nav1p8 = 0.005
-      sec.gnabar_nav1p6 = random.uniform(0.35, 0.5)
-      sec.gnabar_nav11_L263V = random.uniform(0.35, 0.5)
-      # sec.gnabar_nav1p1 = 0.55#random.uniform(0.35, 0.5)
+      sec.gbar_nav1p8 = 0.0#01
+      sec.gnabar_nav1p6 = 0.2#random.uniform(0.15, 0.35)
+      # sec.gnabar_nav11_L263V = random.uniform(0.35, 0.5)
+      sec.gnabar_nav11_WT_Q1478K = 0.5#random.uniform(0.35, 0.5)
 
       # sec.vhminf_nav1
-      sec.gkbar_kv1 = random.uniform(0.02, 0.04)
-      sec.gkbar_kv3 = random.uniform(0.02, 0.04)
+      sec.gkbar_kv1 = 0.001#random.uniform(0.005, 0.01)
+      sec.gkbar_kv3 = 0.01#random.uniform(0.005, 0.01)
       sec.gkbar_kv4 = 0.001
-      sec.gbar_nattxs = random.uniform(0.2, 0.3)
+      sec.gbar_nattxs = 0.05#random.uniform(0.2, 0.3)
       sec.gbar_Nav1_3 = 0.0
       sec.g_pas = 0.0002
       sec.e_pas = -60
       sec.ena = 55
       sec.ek = -90
       # #
-      sec.gbar_iKCa = 0.0005
+      sec.gbar_iKCa = 0.0001
       sec.depth_CaIntraCellDyn = 0.1
       sec.cai_tau_CaIntraCellDyn = 2.0
       sec.cai_inf_CaIntraCellDyn = 50.0e-6
-      sec.pcabar_iCaL = 0.0001
+      sec.gbar_iCaAN = 3e-5
 
       # sec.smalla_nakpump = -0.047891
       # sec.theta_naoi = 0.00129

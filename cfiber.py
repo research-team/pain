@@ -209,7 +209,7 @@ class cfiber(object):
                 self.add_5HTreceptors(sec, random.randint(10, 20), 10)
             else:
                 self.add_P2Xreceptors(sec, 10, 5, temperature)
-                self.add_5HTreceptors(sec, 10, 10)
+                # self.add_5HTreceptors(sec, 10, 10)
 
 
     def add_P2Xreceptors(self, compartment, time, g, temperature):
