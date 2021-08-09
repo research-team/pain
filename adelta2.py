@@ -27,8 +27,8 @@ class adelta2(object):
     self.axon3 = axon(10)
     self.synapses()
     # self.axon4 = axon(10)
-    self.axons.append(self.axon2)
     self.axons.append(self.axon3)
+    self.axons.append(self.axon2)
     self.axons.append(self.axon1)
     self.x_application = 5600
     self.fast_diff = diff_type
@@ -127,10 +127,10 @@ class adelta2(object):
       #     self.add_5HTreceptors(sec, 10, 15)
           # self.add_P2Xreceptors(sec, 10, 15)
       for sec in self.axon2.node:
-          self.add_5HTreceptors(sec, random.randint(10,15), 15)
+          self.add_5HTreceptors(sec, random.randint(10,20), 15)
           # self.add_P2Xreceptors(sec, 10, 15)
       for sec in self.axon3.node:
-          self.add_5HTreceptors(sec, random.randint(10,15), 15)
+          self.add_5HTreceptors(sec, random.randint(10,20), 15)
           # self.add_P2Xreceptors(sec, 10, 15)
 
 

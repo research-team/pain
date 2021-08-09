@@ -102,7 +102,7 @@ def simulate(cells, tstop=500, vinit=-55):
 def spike_time_rec(section):
     vec = h.Vector()
     netcon = h.NetCon(section(0.5)._ref_v, None, sec=section)
-    netcon.threshold = -10
+    netcon.threshold = -20
     netcon.record(vec)
     return vec
 
@@ -165,17 +165,33 @@ def add_glu_receptors(compartment, pre, g1, g2):
     h.setpointer(pre(0.5)._ref_v, 'affv', diff)
     diffs.append(diff)
 
-    for sec in compartment:
+    for section in compartment:
         # print(compartment)
-        rec = h.ampa_rec(sec(0.5))
+        rec = h.ampa_rec(section(0.5))
         rec.gmax=random.gauss(g1, g1 / 10)
         h.setpointer(diff._ref_glu, 'glu_m', rec)        # vc = h.IClamp(0.5, sec=cell.axon1.node[5])
         recs.append(rec)
-        rec2 = h.nmda_rec(sec(0.5))
+        rec2 = h.nmda_rec(section(0.5))
         rec2.gmax=random.gauss(g2, g2 / 10)
         # print(g2)
         h.setpointer(diff._ref_glu, 'glu_m', rec2)        # vc = h.IClamp(0.5, sec=cell.axon1.node[5])
         recs.append(rec2)
+        syn = h.StdwaSA(section(0.5))#OM0.synlistex[0]
+        nc = h.NetCon(pre(0.5)._ref_v, syn, sec=pre)
+
+        presyn = h.NetCon(pre(0.5)._ref_v, syn, sec=pre)
+        presyn.weight[0] = 1
+        postsyn = h.NetCon(section(0.5)._ref_v, syn, sec=section)
+        postsyn.weight[0] = -1
+        h.setpointer(rec2._ref_gmax, 'wsyn', syn)
+
+        nc.weight[0] = syn.wsyn
+        nc.delay = 1
+        recs.append(nc)
+        recs.append(syn)
+        recs.append(presyn)
+        recs.append(postsyn)
+
 
 def show_output(v_vec, t_vec, label_v):
     ''' show graphs
