@@ -156,9 +156,9 @@ class axon(object):
       sec.insert('iCaAN')
       sec.insert('CaIntraCellDyn')
       sec.gbar_nav1p8 = 0.0#01
-      sec.gnabar_nav1p6 = 0.2#random.uniform(0.15, 0.35)
+      sec.gnabar_nav1p6 = random.uniform(0.15, 0.25)
       # sec.gnabar_nav11_L263V = random.uniform(0.35, 0.5)
-      sec.gnabar_nav11_WT_Q1478K = 0.5#random.uniform(0.35, 0.5)
+      sec.gnabar_nav11_WT_Q1478K = random.uniform(0.35, 0.5)
 
       # sec.vhminf_nav1
       sec.gkbar_kv1 = 0.001#random.uniform(0.005, 0.01)

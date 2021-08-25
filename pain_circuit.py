@@ -76,7 +76,7 @@ def balance(cell, vinit=-55):
         else:
             sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad  + sec.ik_iKCa) / (vinit - sec.ek)
 
-def simulate(cells, tstop=500, vinit=-55):
+def simulate(cells, tstop=400, vinit=-55):
     ''' simulation control
     Parameters
     ----------
@@ -99,10 +99,10 @@ def simulate(cells, tstop=500, vinit=-55):
     h.v_init = vinit
     h.run()
 
-def spike_time_rec(section):
+def spike_time_rec(section, th):
     vec = h.Vector()
     netcon = h.NetCon(section(0.5)._ref_v, None, sec=section)
-    netcon.threshold = -20
+    netcon.threshold = th
     netcon.record(vec)
     return vec
 
@@ -128,13 +128,13 @@ def add_5HT_receptors(compartment, dist, g):
         recs.append(rec)
 
 
-def pool_recording(pool):
+def pool_recording(pool, th):
     v_vecs = []
     spikes_vec = []
     for cell in pool:
         v_vec, t_vec = set_recording_vectors(list(cell.all_secs)[0])
         print(list(cell.all_secs)[0])
-        spike_vec = spike_time_rec(list(cell.all_secs)[0])
+        spike_vec = spike_time_rec(list(cell.all_secs)[0], th)
         spikes_vec.append(spike_vec)
         v_vecs.append(v_vec)
     return v_vecs, spikes_vec, t_vec
@@ -251,39 +251,39 @@ if __name__ == '__main__':
         LCNs.append(interneuron())
         WDRs.append(WDR_model())
         HTs.append(HT_model())
-        a_deltas.append(adelta2(10, True))
-        c_fibers.append(cfiber(250, 0.25, 0, 15000, True, 13))
+        a_deltas.append(adelta2(10, False))
+        c_fibers.append(cfiber(250, 0.25, 0, 15000, False, 8))
     #
     #
     # # add_glu_receptors(IN2.dend, a_delta.axon1.node[0], 10, 1)
     for i in range(15):
-        add_glu_receptors(HTs[random.randint(0, len(HTs)-1)].dend, a_deltas[random.randint(0, len(a_deltas)-1)].axon2.node[5], 150, 300)
+        add_glu_receptors(HTs[random.randint(0, len(HTs)-1)].dend, a_deltas[random.randint(0, len(a_deltas)-1)].axon2.node[5], 250, 300)
         add_glu_receptors(IN2s[random.randint(0, len(IN2s)-1)].dend, a_deltas[random.randint(0, len(a_deltas)-1)].axon3.node[5], 15, 10)
         add_glu_receptors(IN1s[random.randint(0, len(IN2s)-1)].dend, c_fibers[random.randint(0, len(a_deltas)-1)].branch, 15, 10)
-        add_glu_receptors(LCNs[random.randint(0, len(LCNs)-1)].dend, c_fibers[random.randint(0, len(c_fibers)-1)].branch, 150, 30)
-        add_glu_receptors(WDRs[random.randint(0, len(WDRs)-1)].dend, LCNs[random.randint(0, len(LCNs)-1)].axon, 150, 100)
-        add_gaba_receptors(HTs[random.randint(0, len(HTs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 0.005)
-        add_gaba_receptors(WDRs[random.randint(0, len(WDRs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 0.005)
+        add_glu_receptors(LCNs[random.randint(0, len(LCNs)-1)].dend, c_fibers[random.randint(0, len(c_fibers)-1)].branch, 150, 50)
+        add_glu_receptors(WDRs[random.randint(0, len(WDRs)-1)].dend, LCNs[random.randint(0, len(LCNs)-1)].axon, 150, 200)
+        add_gaba_receptors(HTs[random.randint(0, len(HTs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 2.5)
+        add_gaba_receptors(WDRs[random.randint(0, len(WDRs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 2.5)
         # add_glu_receptors(IN1.dend, c_fiber.branch, 10, 1)
-        add_gaba_receptors(LCNs[random.randint(0, len(LCNs)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 0.0025)
-        add_gaba_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 0.0035)
+        add_gaba_receptors(LCNs[random.randint(0, len(LCNs)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 1.5)
+        add_gaba_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 0.5)
 
-
-    # add_5HT_receptors(IN2s[random.randint(0, len(IN2s)-1)].dend, 100, 50)
-    # add_5HT_receptors(IN1s[random.randint(0, len(IN1s)-1)].dend, 100, 50)
+    #
+    # add_5HT_receptors(IN2s[random.randint(0, len(IN2s)-1)].dend, 100, 80)
+    # add_5HT_receptors(IN1s[random.randint(0, len(IN1s)-1)].dend, 100, 80)
     #
     # add_5HT_receptors(a_deltas[random.randint(0, len(a_deltas)-1)].axon1.node, 100, 10)
-    # add_5HT_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].stimsec, 100, 20)
+    # add_5HT_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].stimsec, 100, 10)
 
     # for sec in h.allsec():
     #     h.psection(sec=sec) #show parameters of each section
-    v_vecs, spikes_vec, t_vec = pool_recording(a_deltas)
-    v_vecs_cf, spikes_vecs_cf, t_vec = pool_recording(c_fibers)
-    v_vecs_in2, spikes_vecs_in2, t_vec = pool_recording(IN2s)
-    v_vecs_in1, spikes_vecs_in1, t_vec = pool_recording(IN1s)
-    v_vecs_lcn, spikes_vecs_lcn, t_vec = pool_recording(LCNs)
-    v_vecs_wdr, spikes_vecs_wdr, t_vec = pool_recording(WDRs)
-    v_vecs_ht, spikes_vecs_ht, t_vec = pool_recording(HTs)
+    v_vecs, spikes_vec, t_vec = pool_recording(a_deltas, -20)
+    v_vecs_cf, spikes_vecs_cf, t_vec = pool_recording(c_fibers, 0)
+    v_vecs_in2, spikes_vecs_in2, t_vec = pool_recording(IN2s, 0)
+    v_vecs_in1, spikes_vecs_in1, t_vec = pool_recording(IN1s, 0)
+    v_vecs_lcn, spikes_vecs_lcn, t_vec = pool_recording(LCNs, 0)
+    v_vecs_wdr, spikes_vecs_wdr, t_vec = pool_recording(WDRs, -10)
+    v_vecs_ht, spikes_vecs_ht, t_vec = pool_recording(HTs, -5)
 
     simulate(c_fibers)
     # show_output(v_vecs, t_vec, "a_delta")
@@ -299,6 +299,7 @@ if __name__ == '__main__':
     spike_time_plot(spikes_vecs_cf, 2, 'c')
     spike_time_plot(spikes_vecs_wdr, 3, 'm')
     spike_time_plot(spikes_vecs_ht, 4, 'r')
-
+    spike_time_plot(spikes_vecs_in1, 5, 'k')
+    spike_time_plot(spikes_vecs_in2, 6, 'm')
 
     pyplot.show()

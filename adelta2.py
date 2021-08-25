@@ -178,13 +178,13 @@ class adelta2(object):
       else:
           diff = h.AtP_slow(compartment(0.5))
           diff.h = self.distance(compartment, x[0], y[0], z[0])
-          diff.tx1 = time + 0 + (diff.h/1250)*1000
-          diff.c0cleft = 100
+          diff.tx1 = time + 0 #+ (diff.h/1250)*1000
+          diff.c0cleft = 0.200
       # self.diffusions.update({diff: compartment})
           rec = h.p2x3(compartment(0.5))
           rec.gmax = g
           rec.Ev = 5
-          h.setpointer(diff._ref_atp, 'patp', rec)
+          h.setpointer(diff._ref_c0cleft, 'patp', rec)
           self.recs.append(rec)
           self.diffs.append(diff)
 
