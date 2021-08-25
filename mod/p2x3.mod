@@ -61,8 +61,14 @@ ASSIGNED {
   m2 (/s)
   m3 (/s)
   m4 (/s)
+	r1 (/s)
+	r2 (/s)
+	r3 (/s)
+	r4 (/s)
+	r5 (/s)
 
-	q10
+
+	kvot_qt
 }
 
 STATE {
@@ -99,21 +105,22 @@ KINETIC kstates{
   m3 = M3*patp
   m4 = M4*patp
 
-	q10 = 1/((9^((celsiusT-15)/10)))
-	R1 = R1 * q10
-	R2 = R2 * q10
-	R3 = R3 * q10
-	R4 = R4 * q10
+  kvot_qt = 1/((9^((celsiusT-20)/10)))
+	r1 = R1 * kvot_qt
+	r2 = R2 * kvot_qt
+	r3 = R3 * kvot_qt
+	r4 = R4 * kvot_qt
+	r5 = R5 * kvot_qt
 
 	~ Re <-> AR (k1, L1)
 	~ AR <-> A2R (k2, L2)
-	~ AR <-> AD (D2, R2)
+	~ AR <-> AD (D2, r2)
 	~ A2R <-> A3R (k3, L3)
-	~ A2R <-> A2D (D3, R3)
-	~ Re <-> D (D1, R1)
+	~ A2R <-> A2D (D3, r3)
+	~ Re <-> D (D1, r1)
 	~ A3R <-> Ro (K4, L4)
-	~ A3R <-> A3D (D4, R4)
-	~ Ro <-> A3Df (D5, R5)
+	~ A3R <-> A3D (D4, r4)
+	~ Ro <-> A3Df (D5, r5)
 	~ A3Df <-> A3D (N4, M4)
 	~ A3D <-> A2D (N3, m3)
 	~ A2D <-> AD (N2, m2)

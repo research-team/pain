@@ -25,7 +25,7 @@ class cfiber(object):
     recs: list
         list of receptors mechanisms (NEURON staff)
     '''
-    def __init__(self, L, d, zpozition, x_application, fast_diff, numofmodel, temperature = 37):
+    def __init__(self, L, d, zpozition, x_application, fast_diff, numofmodel, temperature = 12):
         self.coordinates = dict()
         self.distances = dict()
         self.diffusions = dict()
@@ -168,7 +168,7 @@ class cfiber(object):
             sec.insert('iCaAN')
             sec.insert('CaIntraCellDyn')
             if self.numofmodel == 8 or self.numofmodel >= 11:
-                sec.gbar_nav1p8 = 0.15
+                sec.gbar_nav1p8 = random.uniform(0.15, 0.25)
                 sec.gbar_nav1p9 = 0.00003
             elif self.numofmodel == 7:
                 sec.gbar_nav1p8 = 0.1
@@ -244,8 +244,8 @@ class cfiber(object):
         else:
             diff = h.AtP_slow(compartment(0.5))
             diff.h = self.distances.get(compartment)
-            diff.tx1 = time + 0 + (diff.h/1250)*1000
-            diff.c0cleft = 100
+            diff.tx1 = time + 0 #+ (diff.h/1250)*1000
+            diff.c0cleft = 0.300
         self.diffusions.update({diff: compartment})
         rec = h.p2x3(compartment(0.5))
         rec.gmax = g

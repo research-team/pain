@@ -32,13 +32,13 @@ def set_recording_vectors(compartment):
     t_vec = h.Vector()        # Time stamp vector
 
     v_vec11.record(compartment(0.5)._ref_ina_nav1p9)
-    v_vec13.record(compartment(0.5)._ref_ina_Nav1_3)
-    v_vec16.record(compartment(0.5)._ref_ina_nav1p9)
+    v_vec13.record(compartment(0.5)._ref_ica_iCaAN)
+    v_vec16.record(compartment(0.5)._ref_ik_kdr)
     v_vec17.record(compartment(0.5)._ref_ina_nattxs)
-    v_vec18.record(compartment(0.5)._ref_ina_navv1p8)
-    v_vecka.record(compartment(0.5)._ref_ik_kv2)
-    v_veckd.record(compartment(0.5)._ref_ik_kv4)
-    v_vec.record(compartment(0.5)._ref_v)
+    v_vec18.record(compartment(0.5)._ref_ina_nav1p8)
+    v_vecka.record(compartment(0.5)._ref_ik_kap)
+    v_veckd.record(compartment(0.5)._ref_ik_kad)
+    v_vec.record(compartment(0.5)._ref_vext[0])
     v_veckca.record(compartment(0.5)._ref_ik_iKCa)
 
     t_vec.record(h._ref_t)
@@ -53,18 +53,18 @@ def balance(cell, vinit=-55):
     vinit: int (mV)
         initialized voltage
     '''
-    for sec in cell.all:
-        if ((-(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_Nav1_3 + sec.ina_nav1p1 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)) < 0):
-            sec.pumpina_extrapump = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_nav1p1 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9)
+    for sec in cell.all_secs:
+        if ((-(sec.ina_nattxs + sec.ina_nav1p8 + sec.ina_Nav1_3  + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)) < 0):
+            sec.pumpina_extrapump = -(sec.ina_nattxs + sec.ina_nav1p8  + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9)
         else:
-            sec.gnaleak_leak = -(sec.ina_nattxs + sec.ina_navv1p8 + sec.ina_nav1p1 + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)
+            sec.gnaleak_leak = -(sec.ina_nattxs + sec.ina_nav1p8  + sec.ina_Nav1_3 + sec.ina_nakpump + sec.ina_nav1p9) / (vinit - sec.ena)
 
-        if ((-(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa) / (vinit - sec.ek)) < 0):
-            sec.pumpik_extrapump = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa)
+        if ((-(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad + sec.ik_iKCa) / (vinit - sec.ek)) < 0):
+            sec.pumpik_extrapump = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kad + sec.ik_kap+ sec.ik_iKCa)
         else:
-            sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kv1 + sec.ik_kv4 + sec.ik_kv2 + sec.ik_iKCa) / (vinit - sec.ek)
+            sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad  + sec.ik_iKCa) / (vinit - sec.ek)
 
-def simulate(cell, tstop=400, vinit=-55):
+def simulate(cell, tstop=350, vinit=-55):
     ''' simulation control
     Parameters
     ----------
@@ -127,44 +127,47 @@ def show_output(v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v
     t_vec: h.Vector()
         recorded time
     '''
-    # pyplot.plot(t_vec, v_vec11, label = 'Nav1.1')
-    # pyplot.plot(t_vec, v_vec13, label = 'Nav1.3')
-    # pyplot.plot(t_vec, v_vec16, label = 'Nav1.9')
-    # pyplot.plot(t_vec, v_vec17, label = 'Nav1.7')
-    # pyplot.plot(t_vec, v_vec18, label = 'Nav1.8')
-    # pyplot.plot(t_vec, v_vecka, label = 'Kv2')
-    # pyplot.plot(t_vec, v_veckd, label = 'Kv4')
-    # pyplot.clf()
-    pyplot.plot(t_vec, v_vec, label = 'Kv1')
+    pyplot.plot(t_vec, v_vec11, label = 'Nav1.9')
+    pyplot.plot(t_vec, v_vec13, label = 'iCan')
+    pyplot.plot(t_vec, v_vec16, label = 'KDr')
+    pyplot.plot(t_vec, v_vec17, label = 'Nav1.7')
+    pyplot.plot(t_vec, v_vec18, label = 'Nav1.8')
+    pyplot.plot(t_vec, v_vecka, label = 'Kv2')
+    pyplot.plot(t_vec, v_veckd, label = 'Kv4')
+    pyplot.clf()
+    pyplot.plot(t_vec, v_vec, label = 'V')
+    print(f'max - {max(v_vec)}')
+    print(f'min - {min(v_vec)}')
+
     # pyplot.plot(t_vec, v_veckca, label = 'K_Ca')
 
 
 
-    # f = open('./res.txt', 'w')
-    # for v in list(v_vec):
-    #     f.write(str(v)+"\n")
+    f = open('./res.txt', 'w')
+    for v in list(v_vec):
+        f.write(str(v)+"\n")
     pyplot.legend()
     pyplot.xlabel('time (ms)')
-    pyplot.ylabel('mA/cm^2')
+    pyplot.ylabel('mV')
 
 if __name__ == '__main__':
     numofmodel = int(sys.argv[3])
     if numofmodel < 1 or numofmodel > 14:
         print("ERROR! Please input model number in range 1...14")
     else:
-        cell = cfiber(250, 0.25, 0, 15020, True, numofmodel)
-        for sec in h.allsec():
-            h.psection(sec=sec) #show parameters of each section
+        cell = cfiber(250, 0.25, 0, 15000, True, numofmodel)
+        # for sec in h.allsec():
+        #     h.psection(sec=sec) #show parameters of each section
         # branch_vec, t_vec = set_recording_vectors(cell.stimsec[9])
         v_vec11, v_vec13, v_vec16, v_vec17, v_vec18, v_vecka, v_veckd, v_vec, v_veckca, t_vec = set_recording_vectors(cell.branch)
 
-        vc = h.VClamp(0.5, sec=cell.stimsec[9])
-        vc.dur[0] = 10.0
-        vc.dur[1] = 100.0
-        vc.dur[2] = 0.0
-        vc.amp[0] = -55
-        vc.amp[1] = -40
-        vc.amp[2] = 0
+        # vc = h.VClamp(0.5, sec=cell.stimsec[9])
+        # vc.dur[0] = 0.0
+        # vc.dur[1] = 90.0
+        # vc.dur[2] = 5.0
+        # vc.amp[0] = -55
+        # vc.amp[1] = -50
+        # vc.amp[2] = -45
         # branch_vec1, t_vec1 = set_recording_vectors(cell.stimsec[1])
         # branch_vec2, t_vec2 = set_recording_vectors(cell.stimsec[4])
         print("Number of model - ",cell.numofmodel)
