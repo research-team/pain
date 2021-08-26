@@ -35,8 +35,8 @@ class WDR_model(object):
     # self.geom_nseg()
     self.biophys()
     self.synlistinh = []
-    self.synlistex = []
-    self.synlistees = []
+    self.synliststpd = []
+
     self.synapses()
     self.x = self.y = self.z = 0.
 
@@ -225,6 +225,12 @@ class WDR_model(object):
     for i in range(30):
         s = h.GABAa_DynSyn(self.soma(0.5)) # Inhibitory
         self.synlistinh.append(s)
+
+    for sec in self.dend:
+        for i in range(2):
+            syn = h.StdwaSA(sec(0.5))
+            self.synliststpd.append(syn)
+
             #
 
 
