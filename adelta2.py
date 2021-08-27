@@ -22,13 +22,14 @@ class adelta2(object):
     self.recs = []
     self.axons = []
     self.synlistinh = []
+    self.synlistex = []
     self.axon1 = axon(17)
     self.axon2 = axon(10)
     self.axon3 = axon(10)
     self.synapses()
     # self.axon4 = axon(10)
-    self.axons.append(self.axon3)
     self.axons.append(self.axon2)
+    self.axons.append(self.axon3)
     self.axons.append(self.axon1)
     self.x_application = 5600
     self.fast_diff = diff_type
@@ -120,17 +121,17 @@ class adelta2(object):
       # self.soma.celsiusT_nattxs = 37
       # self.soma.celsiusT_nav1p8 = 37
 
-      print(self.coordinates)
+      # print(self.coordinates)
 
       # self.add_5HTreceptors(sec, 10, 1)
       # for sec in self.axon1.node:
       #     self.add_5HTreceptors(sec, 10, 15)
           # self.add_P2Xreceptors(sec, 10, 15)
-      for sec in self.axon2.node:
-          self.add_5HTreceptors(sec, random.randint(10,20), 15)
-          # self.add_P2Xreceptors(sec, 10, 15)
-      for sec in self.axon3.node:
-          self.add_5HTreceptors(sec, random.randint(10,20), 15)
+      # for sec in self.axon2.node:
+      #     self.add_5HTreceptors(sec, random.randint(10,20), 15)
+      #     # self.add_P2Xreceptors(sec, 10, 15)
+      # for sec in self.axon3.node:
+      #     self.add_5HTreceptors(sec, random.randint(10,20), 15)
           # self.add_P2Xreceptors(sec, 10, 15)
 
 
@@ -158,8 +159,8 @@ class adelta2(object):
               # if i > 0:
               #     y = y*(-1)
               diff.h = self.distance(compartment, x[i], y[i], z[i])
-              print(compartment)
-              print(diff.h)
+              # print(compartment)
+              # print(diff.h)
               diff.tx1 = time + i*self.dt
               diff.Deff = 0.8
               diff.c0cleft = 1
@@ -209,8 +210,8 @@ class adelta2(object):
           for i in range(len(x)):
             diff = h.diff_5HT(compartment(0.5))
             diff.h = self.distance(compartment, x[i], y[i], z[i])
-            print(compartment)
-            print(diff.h)
+            # print(compartment)
+            # print(diff.h)
             diff.tx1 = time + i*self.dt
             diff.a = 10
             diff.Deff = 0.4
@@ -239,6 +240,10 @@ class adelta2(object):
     for i in range(10):
         s = h.GABAa_DynSyn(self.axon2.node[0](0.5)) # Inhibitory
         self.synlistinh.append(s)
+        s = h.ExpSyn(self.axon2.node[0](0.5)) # Excitatory
+        s.tau = 0.15
+        s.e = 50
+        self.synlistex.append(s)
 
   def connect2target(self, target):
       '''

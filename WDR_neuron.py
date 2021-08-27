@@ -226,9 +226,9 @@ class WDR_model(object):
         s = h.GABAa_DynSyn(self.soma(0.5)) # Inhibitory
         self.synlistinh.append(s)
 
-    for sec in self.dend:
-        syn = h.StdwaSA(sec(0.5))
-        self.synliststpd.append(syn)
+    for section in self.dend:
+        s = h.StdwaSA(section(0.5))
+        self.synliststpd.append(s)
 
 
   def is_art(self):

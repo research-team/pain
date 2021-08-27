@@ -25,7 +25,7 @@ class cfiber(object):
     recs: list
         list of receptors mechanisms (NEURON staff)
     '''
-    def __init__(self, L, d, zpozition, x_application, fast_diff, numofmodel, temperature = 12):
+    def __init__(self, L, d, zpozition, x_application, fast_diff, numofmodel, temperature = 25):
         self.coordinates = dict()
         self.distances = dict()
         self.diffusions = dict()
@@ -33,6 +33,7 @@ class cfiber(object):
         self.diffs = []
         self.recs = []
         self.synlistinh = []
+        self.synlistex = []
         self.L = L
         self.diam = d
         self.zpozition = zpozition
@@ -204,11 +205,11 @@ class cfiber(object):
             sec.celsiusT_iCaAN = temperature
 
 
-        for sec in self.stimsec:
-            if self.numofmodel == 13 or self.numofmodel == 14:
-                self.add_5HTreceptors(sec, random.randint(10, 20), 10)
-            else:
-                self.add_P2Xreceptors(sec, 10, 5, temperature)
+        # for sec in self.stimsec:
+        #     if self.numofmodel == 13 or self.numofmodel == 14:
+        #         self.add_5HTreceptors(sec, random.randint(10, 20), 10)
+        #     else:
+        #         self.add_P2Xreceptors(sec, 10, 5, temperature)
                 # self.add_5HTreceptors(sec, 10, 10)
 
 
@@ -324,6 +325,7 @@ class cfiber(object):
         nc = h.NetCon(self.branch(1)._ref_v, target, sec = self.branch)
         nc.threshold = 10
         return nc
+
     def synapses(self):
         '''
         Adds synapses
@@ -331,3 +333,8 @@ class cfiber(object):
         for i in range(10):
             s = h.GABAa_DynSyn(self.branch(0.5)) # Inhibitory
             self.synlistinh.append(s)
+
+            s = h.ExpSyn(self.branch(0.5)) # Excitatory
+            s.tau = 0.15
+            s.e = 50
+            self.synlistex.append(s)

@@ -7,7 +7,7 @@ ENDCOMMENT
 NEURON {
 	POINT_PROCESS StdwaSA
 	RANGE interval, tlast_pre, tlast_post, M, P
-	RANGE deltaw, wmax, aLTP, aLTD
+	RANGE deltaw, wmax, aLTP, aLTD, dw
 	GLOBAL tauLTP, tauLTD, on
 	POINTER wsyn
 }
@@ -20,6 +20,7 @@ ASSIGNED {
 	P			: LTP function
 	deltaw			: change in weight
 	wsyn			: weight of the synapse
+  dw
 }
 
 INITIAL {
@@ -57,15 +58,19 @@ NET_RECEIVE (w) {
 	}
 	if (on) {
 		: printf("before wsyn=%g \n", wsyn)
+    dw = wsyn
 
 		wsyn = wsyn + deltaw
+    dw = wsyn
 		: printf("after wsyn=%g deltaw=%g \n", wsyn, deltaw)
 
 		if (wsyn > wmax) {
 			wsyn = wmax
+      dw = wsyn
 		}
 		if (wsyn < 0) {
 			wsyn = 0
+      dw = wsyn
 		}
 	}
 }
