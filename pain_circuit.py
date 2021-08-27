@@ -122,17 +122,6 @@ def pool_recording(pool, th):
         v_vecs.append(v_vec)
     return v_vecs, spikes_vec, t_vec
 
-def syn_recording(pool):
-    syn_vecs = []
-    for cell in pool:
-        print(cell)
-        for syn in cell.synliststpd:
-            print(syn)
-            syn_vec = h.Vector()
-            syn_vec.record(syn._ref_wsyn)
-            syn_vecs.append(syn_vec)
-    return syn_vecs
-
 def set_syn_vectors(syn):
     v_vec = h.Vector()
     v_vec.record(syn._ref_wsyn)
@@ -141,7 +130,7 @@ def set_syn_vectors(syn):
 def syn_recording(pool):
     syn_vecs = []
     for cell in pool:
-        for i in range(2):
+        for i in range(len(cell.dend)):
             v_vec = set_syn_vectors(cell.synliststpd[i])
             syn_vecs.append(v_vec)
     return syn_vecs

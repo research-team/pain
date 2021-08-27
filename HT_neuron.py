@@ -232,10 +232,8 @@ class HT_model(object):
         self.synlistinh.append(s)
 
     for sec in self.dend:
-        for i in range(2):
-            syn = h.StdwaSA(sec(0.5))
-            self.synliststpd.append(syn)
-
+        syn = h.StdwaSA(sec(0.5))
+        self.synliststpd.append(syn)
 
   def is_art(self):
     return 0
