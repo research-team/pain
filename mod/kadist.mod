@@ -7,7 +7,7 @@ NEURON {
     SUFFIX kad
     USEION k READ ek WRITE ik
         RANGE gbar,gka,ik
-        RANGE ninf,linf,taul,taun
+        RANGE ninf,linf,taul,taun, celsiusT
         GLOBAL lmin,nscale,lscale
         : POINTER im
 }
@@ -25,7 +25,7 @@ PARAMETER {
         dt (ms)
 	v (mV)
         ek = -90 (mV)              : must be explicitely def. in hoc
-	celsius = 24	(degC)
+	celsiusT = 37	(degC)
 	gbar=.008 (mho/cm2)
         vhalfn=-1   (mV)
         vhalfl=-56   (mV)
@@ -40,7 +40,7 @@ PARAMETER {
 	pw=-1    (1)
 	tq=-40 (mV)
 	qq=5  (mV)
-	q10=5
+	q10=3
 	qtl=1
         nscale=1
         lscale=1
@@ -87,21 +87,21 @@ DERIVATIVE states {
 FUNCTION alpn(v(mV)) {
 LOCAL zeta
   zeta=zetan+pw/(1+exp((v-tq)/qq))
-  alpn = exp(1.e-3*zeta*(v-vhalfn)*9.648e4 (degC/mV)/(8.315*(273.16+celsius)))
+  alpn = exp(1.e-3*zeta*(v-vhalfn)*9.648e4 (degC/mV)/(8.315*(273.16+celsiusT)))
 }
 
 FUNCTION betn(v(mV)) {
 LOCAL zeta
   zeta=zetan+pw/(1+exp((v-tq)/qq))
-  betn = exp(1.e-3*zeta*gmn*(v-vhalfn)*9.648e4 (degC/mV)/(8.315*(273.16+celsius)))
+  betn = exp(1.e-3*zeta*gmn*(v-vhalfn)*9.648e4 (degC/mV)/(8.315*(273.16+celsiusT)))
 }
 
 FUNCTION alpl(v(mV)) {
-  alpl = exp(1.e-3*zetal*(v-vhalfl)*9.648e4 (degC/mV)/(8.315*(273.16+celsius)))
+  alpl = exp(1.e-3*zetal*(v-vhalfl)*9.648e4 (degC/mV)/(8.315*(273.16+celsiusT)))
 }
 
 FUNCTION betl(v(mV)) {
-  betl = exp(1.e-3*zetal*gml*(v-vhalfl)*9.648e4 (degC/mV)/(8.315*(273.16+celsius)))
+  betl = exp(1.e-3*zetal*gml*(v-vhalfl)*9.648e4 (degC/mV)/(8.315*(273.16+celsiusT)))
 }
 LOCAL facn,facl
 
@@ -119,7 +119,7 @@ LOCAL facn,facl
 
 PROCEDURE rates(v (mV)) { :callable from hoc
         LOCAL a,qt
-        qt=q10^((celsius-24)/10 (degC))
+        qt=q10^((celsiusT-24)/10 (degC))
         a = alpn(v)
         ninf = 1/(1 + a)
         taun = betn(v)/(qt*a0n*(1+a))

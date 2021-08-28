@@ -123,7 +123,7 @@ FUNCTION rates(Vm (mV)) (/ms) {
 	 tau_s = 1.0 / (alphas(Vm) + betas(Vm))
          sinf = alphas(Vm) * tau_s
 
-         kvot_qt=1/((2.5^((celsiusT-21)/10)))
+         kvot_qt=1/((2^((celsiusT-21)/10)))
          tau_m=tau_m*kvot_qt
          tau_h=tau_h*kvot_qt
          tau_s=tau_s*kvot_qt
