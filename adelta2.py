@@ -59,9 +59,9 @@ class adelta2(object):
       i = 0
       z = 0#random.randint(0, 2500)
       for sec in axon.node:
-        h.pt3dclear()
-        h.pt3dadd((last_x + axon.interlength*i),  i*plus_y, z, axon.nodeD)
-        h.pt3dadd((last_x + axon.interlength*i + axon.nodelength), i*2*plus_y, z, axon.nodeD)
+        # h.pt3dclear()
+        # h.pt3dadd((last_x + axon.interlength*i),  i*plus_y, z, axon.nodeD)
+        # h.pt3dadd((last_x + axon.interlength*i + axon.nodelength), i*2*plus_y, z, axon.nodeD)
         xyz = dict(x=(last_x + axon.interlength*i + axon.nodelength), y=i*2*plus_y, z=z)
         self.coordinates.update({sec: xyz})
         i+=1
@@ -79,7 +79,7 @@ class adelta2(object):
     pass
 
   def add_receptors(self):
-      self.axon1.node[0].connect(self.soma(0))
+      # self.axon1.node[0].connect(self.soma(0))
       self.axon2.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](0))
       self.axon3.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](0))
       # self.axon4.node[0].connect(self.axon1.MYSA[len(self.axon1.MYSA)-1](1))
@@ -127,12 +127,12 @@ class adelta2(object):
       # for sec in self.axon1.node:
       #     self.add_5HTreceptors(sec, 10, 15)
           # self.add_P2Xreceptors(sec, 10, 15)
-      # for sec in self.axon2.node:
-      #     self.add_5HTreceptors(sec, random.randint(10,20), 15)
-      #     # self.add_P2Xreceptors(sec, 10, 15)
-      # for sec in self.axon3.node:
-      #     self.add_5HTreceptors(sec, random.randint(10,20), 15)
-          # self.add_P2Xreceptors(sec, 10, 15)
+      for sec in self.axon2.node:
+          self.add_5HTreceptors(sec, random.randint(10, 20), 29)
+          # self.add_P2Xreceptors(sec, 10, 20)
+      for sec in self.axon3.node:
+          self.add_5HTreceptors(sec, random.randint(10, 20), 29)
+          # self.add_P2Xreceptors(sec, 10, 20)
 
 
   def add_P2Xreceptors(self, compartment, time, g):
@@ -149,8 +149,8 @@ class adelta2(object):
       g: float
           receptor conductance
       '''
-      x = [8300, 13485, 13485]
-      y = [0, 1800, -1800]
+      x = [13485, 13485]
+      y = [1800, -1800]
       z = [0, 0, 0]
 
       if self.fast_diff:
@@ -166,7 +166,7 @@ class adelta2(object):
               diff.c0cleft = 1
               diff.k = 0.001
               rec = h.p2x3(compartment(0.5))
-              rec.gmax = g
+              rec.gmax = random.gauss(g, g / 10)
               rec.Ev = 5
               rec2 = h.p2x2(compartment(0.5))
               rec2.gmax = 0
@@ -183,7 +183,7 @@ class adelta2(object):
           diff.c0cleft = 0.200
       # self.diffusions.update({diff: compartment})
           rec = h.p2x3(compartment(0.5))
-          rec.gmax = g
+          rec.gmax = random.gauss(g, g / 10)
           rec.Ev = 5
           h.setpointer(diff._ref_c0cleft, 'patp', rec)
           self.recs.append(rec)
@@ -203,8 +203,8 @@ class adelta2(object):
       g: float
           receptor conductance
       '''
-      x = [8300, 13485, 13485]
-      y = [0, 1800, -1800]
+      x = [13485, 13485]
+      y = [1800, -1800]
       z = [0, 0, 0]
       if self.fast_diff:
           for i in range(len(x)):
@@ -213,7 +213,7 @@ class adelta2(object):
             # print(compartment)
             # print(diff.h)
             diff.tx1 = time + i*self.dt
-            diff.a = 10
+            diff.a = 1
             diff.Deff = 0.4
             diff.c0cleft = 2
             rec = h.r5ht3a(compartment(0.5))

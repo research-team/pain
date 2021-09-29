@@ -3,7 +3,7 @@ from neuron.units import ms, mV
 h.load_file("stdgui.hoc")
 # import matplotlib
 # matplotlib.use('TkAgg')
-# import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as pyplot
 import math
 #neuron.load_mechanisms("./mod")
 import logging
@@ -69,7 +69,7 @@ def balance(cell, vinit=-55):
         else:
             sec.gkleak_leak = -(sec.ik_kdr + sec.ik_nakpump + sec.ik_kap + sec.ik_kad  + sec.ik_iKCa) / (vinit - sec.ek)
 
-def simulate(cells, tstop=100, vinit=-55):
+def simulate(cells, tstop=1000, vinit=-55):
     ''' simulation control
     Parameters
     ----------
@@ -124,9 +124,9 @@ def add_5HT_receptors(compartment, dist, g):
     for sec in compartment:
         diff = h.slow_5HT(sec(0.5))
         diff.h = dist#self.distances.get(compartment)
-        diff.tx1 = 0 #+ (diff.h/50)*10#00
+        diff.tx1 = 0 + (diff.h/50)*10#00
         diff.c0cleft = 2
-        diff.a = 30
+        diff.a = 10
         rec = h.r5ht3a(sec(0.5))
         rec.gmax = random.gauss(g, g / 10)
         h.setpointer(diff._ref_serotonin, 'serotonin', rec)
@@ -162,8 +162,9 @@ def spike_time_plot(pool_spikes, ymax, color, file_name):
         for spike in pool_spikes:
         # print(list(spike))
             for x in list(spike):
-                # pyplot.vlines(x, ymax-1, ymax, colors=color)
+                pyplot.vlines(x, ymax-1, ymax, colors=color)
                 spk_file.write(str(x)+"\n")
+            pyplot.xlim(0, h.tstop)
 
 
 def add_glu_receptors(cell, pre, g1, g2, withSTDP=False):
@@ -215,14 +216,14 @@ def show_output(v_vec, t_vec, label_v):
     outavg = []
     for i in v_vec:
         outavg.append(list(i))
-        # pyplot.plot(t_vec, i, label = label_v)
+        # pyplot.plot(t_vec, i)
     outavg = np.mean(np.array(outavg), axis = 0, dtype=np.float32)
 
-    # pyplot.plot(t_vec, outavg, label = label_v)
-    #
-    # pyplot.legend()
-    # pyplot.xlabel('time (ms)')
-    # pyplot.ylabel('mV')
+    pyplot.plot(t_vec, outavg, label = label_v)
+
+    pyplot.legend()
+    pyplot.xlabel('time (ms)')
+    pyplot.ylabel('mV')
     # pyplot.savefig(f"./results/ad_q_cur2_{dt}.pdf", format="pdf")
 
     with open(f'./results/{label_v}_res.txt', 'w') as f:
@@ -246,45 +247,47 @@ if __name__ == '__main__':
 
 
     for i in range(10):
-        c_fibers.append(cfiber(250, 0.25, 0, 15000, True, 8))
+        WDRs.append(WDR_model())
+        c_fibers.append(cfiber(250, 0.25, 0, 15000, True, 14))
+        a_deltas.append(adelta2(10, True))
+
         HTs.append(HT_model())
         IN2s.append(interneuron())
         IN1s.append(interneuron())
         LCNs.append(interneuron())
-        WDRs.append(WDR_model())
-        a_deltas.append(adelta2(10, True))
+
     #
     logging.info("create circuit")
 
     # # add_glu_receptors(IN2.dend, a_delta.axon1.node[0], 10, 1)
 
-    for i in range(15):
-        add_glu_receptors(HTs[random.randint(0, len(HTs)-1)], a_deltas[random.randint(0, len(a_deltas)-1)].axon2.node[5], 250, 200, True)
-        add_glu_receptors(IN2s[random.randint(0, len(IN2s)-1)], a_deltas[random.randint(0, len(a_deltas)-1)].axon3.node[5], 15, 10)
-        add_glu_receptors(IN1s[random.randint(0, len(IN2s)-1)], c_fibers[random.randint(0, len(a_deltas)-1)].branch, 15, 10)
-        add_glu_receptors(LCNs[random.randint(0, len(LCNs)-1)], c_fibers[random.randint(0, len(c_fibers)-1)].branch, 150, 50)
-        add_glu_receptors(WDRs[random.randint(0, len(WDRs)-1)], LCNs[random.randint(0, len(LCNs)-1)].axon, 150, 200, True)
-        # add_gaba_receptors(HTs[random.randint(0, len(HTs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 2.5)
-        # add_gaba_receptors(WDRs[random.randint(0, len(WDRs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 2.5)
-        # # add_glu_receptors(IN1.dend, c_fiber.branch, 10, 1)
-        # add_gaba_receptors(LCNs[random.randint(0, len(LCNs)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 1.5)
-        # add_gaba_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 0.5)
+    for i in range(20):
+        add_glu_receptors(HTs[random.randint(0, len(HTs)-1)], a_deltas[random.randint(0, len(a_deltas)-1)].axon2.node[5], 150, 250, False)
+        add_glu_receptors(IN2s[random.randint(0, len(IN2s)-1)], a_deltas[random.randint(0, len(a_deltas)-1)].axon3.node[5], 20, 10)
+        add_glu_receptors(IN1s[random.randint(0, len(IN1s)-1)], c_fibers[random.randint(0, len(c_fibers)-1)].branch, 15, 10)
+        add_glu_receptors(LCNs[random.randint(0, len(WDRs)-1)], c_fibers[random.randint(0, len(c_fibers)-1)].branch, 150, 300)
+        add_glu_receptors(WDRs[random.randint(0, len(WDRs)-1)], LCNs[random.randint(0, len(LCNs)-1)].axon, 150, 400, False)
+        add_gaba_receptors(HTs[random.randint(0, len(HTs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 1.5)
+        add_gaba_receptors(WDRs[random.randint(0, len(WDRs)-1)].synlistinh, IN2s[random.randint(0, len(IN2s)-1)].axon, 1.5)
+        # add_glu_receptors(IN1.dend, c_fiber.branch, 10, 1)
+        add_gaba_receptors(LCNs[random.randint(0, len(LCNs)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 1.5)
+        add_gaba_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].synlistinh, IN1s[random.randint(0, len(IN1s)-1)].axon, 0.5)
 
-        gen_connect(a_deltas[random.randint(0, len(a_deltas)-1)].synlistex, 50)
-        gen_connect(c_fibers[random.randint(0, len(c_fibers)-1)].synlistex, 50)
+        # gen_connect(a_deltas[random.randint(0, len(a_deltas)-1)].synlistex, 50)
+        # gen_connect(c_fibers[random.randint(0, len(c_fibers)-1)].synlistex, 50)
 
     logging.info("add connections")
-
-    # add_5HT_receptors(IN2s[random.randint(0, len(IN2s)-1)].dend, 100, 80)
-    # add_5HT_receptors(IN1s[random.randint(0, len(IN1s)-1)].dend, 100, 80)
     #
-    # add_5HT_receptors(a_deltas[random.randint(0, len(a_deltas)-1)].axon1.node, 100, 10)
-    # add_5HT_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].stimsec, 100, 10)
+    # add_5HT_receptors(IN2s[random.randint(0, len(IN2s)-1)].dend, 100, 30)
+    # add_5HT_receptors(IN1s[random.randint(0, len(IN1s)-1)].dend, 100, 30)
+    #
+    # add_5HT_receptors(a_deltas[random.randint(0, len(a_deltas)-1)].axon1.node, 100, 50)
+    # add_5HT_receptors(c_fibers[random.randint(0, len(c_fibers)-1)].stimsec, 100, 25)
 
     # for sec in h.allsec():
     #     h.psection(sec=sec) #show parameters of each section
     wdr_syn_vecs = syn_recording(WDRs)
-    ht_syn_vecs = syn_recording(HTs)
+    # ht_syn_vecs = syn_recording(HTs)
 
     v_vecs, spikes_vec, t_vec = pool_recording(a_deltas, -20)
     v_vecs_cf, spikes_vecs_cf, t_vec = pool_recording(c_fibers, 0)
@@ -306,20 +309,21 @@ if __name__ == '__main__':
     #
     # show_output(v_vecs_lcn, t_vec, "LCN")
     #
-    show_output(ht_syn_vecs, t_vec, "HT")
-    # # show_output(v_vecs_in1, t_vec, "IN1")
+    # show_output(ht_syn_vecs, t_vec, "HT")
+    # show_output(v_vecs_in1, t_vec, "IN1")
     # pyplot.show()
     #
-    show_output(wdr_syn_vecs, t_vec, "WDR")
+    # show_output(v_vecs_wdr, t_vec, "WDR")
     # pyplot.show()
     spike_time_plot(spikes_vec, 1, 'k', "./results/a_delta_spk.txt")
     spike_time_plot(spikes_vecs_cf, 2, 'c', "./results/c_fiber_spk.txt")
     spike_time_plot(spikes_vecs_wdr, 3, 'm', "./results/WDR_spk.txt")
-    spike_time_plot(spikes_vecs_ht, 4, 'r', "./results/HT_spk.txt")
+    spike_time_plot(spikes_vecs_lcn, 4, 'c', "./results/lcn_spk.txt")
+    spike_time_plot(spikes_vecs_ht, 5, 'r', "./results/HT_spk.txt")
 
     logging.info("recorded")
 
     # spike_time_plot(spikes_vecs_in1, 5, 'k')
     # spike_time_plot(spikes_vecs_in2, 6, 'm')
 
-    # pyplot.show()
+    pyplot.show()

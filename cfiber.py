@@ -45,7 +45,7 @@ class cfiber(object):
             self.num = 120
         self.create_sections()
         self.build_topology()
-        # self.build_subsets()
+        # # self.build_subsets()
         self.define_geometry()
         self.position()
         self.distance()
@@ -98,35 +98,35 @@ class cfiber(object):
         Adds 3D position
         '''
         if self.numofmodel == 11 or self.numofmodel == 12:
-            h.pt3dclear()
-            h.pt3dadd(0, 0, self.zpozition, self.diam)
-            h.pt3dadd(self.L, 0, self.zpozition, self.diam)
+            # h.pt3dclear()
+            # h.pt3dadd(0, 0, self.zpozition, self.diam)
+            # h.pt3dadd(self.L, 0, self.zpozition, self.diam)
             xyz = dict(x=self.L, y=0, z=0)
             self.coordinates.update({self.branch: xyz})
             for i in range(70):
-                h.pt3dclear()
-                h.pt3dadd(self.L*(i+1), 0, self.zpozition, self.diam)
-                h.pt3dadd(self.L*(i+2), 0, self.zpozition, self.diam)
+                # h.pt3dclear()
+                # h.pt3dadd(self.L*(i+1), 0, self.zpozition, self.diam)
+                # h.pt3dadd(self.L*(i+2), 0, self.zpozition, self.diam)
                 xyz = dict(x=self.L*(i+2), y=0, z=0)
                 self.coordinates.update({self.stimsec[i]: xyz})
             for i in range(70, 120):
-                h.pt3dclear()
-                h.pt3dadd(self.L*(i+1), (i-70)*8, self.zpozition, self.diam)
-                h.pt3dadd(self.L*(i+2), (i-69)*8, self.zpozition, self.diam)
+                # h.pt3dclear()
+                # h.pt3dadd(self.L*(i+1), (i-70)*8, self.zpozition, self.diam)
+                # h.pt3dadd(self.L*(i+2), (i-69)*8, self.zpozition, self.diam)
                 xyz = dict(x=self.L*(i+2), y=(i-69)*8, z=0)
-                self.coordinates.update({self.stimsec[i]: xyz})
+                # self.coordinates.update({self.stimsec[i]: xyz})
             for i in range(120, 170):
-                h.pt3dclear()
-                h.pt3dadd(self.L*(i-49), (i-120)*(-8), self.zpozition, self.diam)
-                h.pt3dadd(self.L*(i-48), (i-119)*(-8), self.zpozition, self.diam)
+                # h.pt3dclear()
+                # h.pt3dadd(self.L*(i-49), (i-120)*(-8), self.zpozition, self.diam)
+                # h.pt3dadd(self.L*(i-48), (i-119)*(-8), self.zpozition, self.diam)
                 xyz = dict(x=self.L*(i-48), y=(i-119)*(-8), z=0)
                 self.coordinates.update({self.stimsec[i]: xyz})
         else:
             i = 0
             for sec in self.all_secs:
-              h.pt3dclear()
-              h.pt3dadd(self.L*i, 0, self.zpozition, self.diam)
-              h.pt3dadd(self.L*(i+1), 0, self.zpozition, self.diam)
+              # h.pt3dclear()
+              # h.pt3dadd(self.L*i, 0, self.zpozition, self.diam)
+              # h.pt3dadd(self.L*(i+1), 0, self.zpozition, self.diam)
               xyz = dict(x=self.L*(i+1), y=0, z=0)
               self.coordinates.update({sec: xyz})
               i+=1
@@ -170,7 +170,7 @@ class cfiber(object):
             sec.insert('CaIntraCellDyn')
             if self.numofmodel == 8 or self.numofmodel >= 11:
                 sec.gbar_nav1p8 = random.uniform(0.15, 0.25)
-                sec.gbar_nav1p9 = 0.00003
+                sec.gbar_nav1p9 = 0.00001
             elif self.numofmodel == 7:
                 sec.gbar_nav1p8 = 0.1
                 sec.gbar_nav1p9 = 0.0001
@@ -178,8 +178,8 @@ class cfiber(object):
                 sec.gbar_nav1p8 = 0
                 sec.gbar_nav1p9 = 0
             sec.gbar_kdr = 0.01
-            sec.gbar_kad = 0.006
-            sec.gbar_kap = 0.006
+            sec.gbar_kad = 0.01
+            sec.gbar_kap = 0.01
             if self.numofmodel == 6:
                 sec.gbar_nattxs = 0.2
             else:
@@ -205,12 +205,12 @@ class cfiber(object):
             sec.celsiusT_iCaAN = temperature
 
 
-        # for sec in self.stimsec:
-        #     if self.numofmodel == 13 or self.numofmodel == 14:
-        #         self.add_5HTreceptors(sec, random.randint(10, 20), 10)
-        #     else:
-        #         self.add_P2Xreceptors(sec, 10, 5, temperature)
-                # self.add_5HTreceptors(sec, 10, 10)
+        for sec in self.stimsec:
+            if self.numofmodel == 13 or self.numofmodel == 14:
+                self.add_5HTreceptors(sec, random.randint(10, 20), 3)
+            else:
+                self.add_P2Xreceptors(sec, 10, 3, temperature)
+                # self.add_5HTreceptors(sec, 10, 3)
 
 
     def add_P2Xreceptors(self, compartment, time, g, temperature):
@@ -286,7 +286,7 @@ class cfiber(object):
             diff.h = self.distances.get(compartment)
             diff.tx1 = time
             if self.numofmodel == 14:
-                diff.a = 0.25
+                diff.a = 10
             else:
                 diff.a = 0
             diff.Deff = 0.2
@@ -301,14 +301,6 @@ class cfiber(object):
         h.setpointer(diff._ref_serotonin, 'serotonin', rec)
         self.diffs.append(diff)
         self.recs.append(rec)
-
-    def build_subsets(self):
-        '''
-        adds sections in NEURON SectionList
-        '''
-        self.all = h.SectionList()
-        for sec in h.allsec():
-          self.all.append(sec=sec)
 
     def connect2target(self, target):
         '''
